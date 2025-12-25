@@ -3,9 +3,8 @@ import { CreateTransactionInput, Summary, Transaction } from '../types/transacti
 // ใช้ env variable สำหรับ API URL
 // - Local: ใช้ proxy ผ่าน vite (VITE_API_URL ว่าง หรือไม่ได้ตั้ง)
 // - Production: ใช้ URL จริง เช่น https://api.example.com
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+export const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
-console.log("API_BASE =", API_BASE);
 
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem('token');
