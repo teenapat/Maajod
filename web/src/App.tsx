@@ -5,6 +5,8 @@ import { Home } from './pages/Home';
 import { Income } from './pages/Income';
 import { Expense } from './pages/Expense';
 import { Summary } from './pages/Summary';
+import { History } from './pages/History';
+import { Dashboard } from './pages/Dashboard';
 import { Login } from './pages/Login';
 import { Loader2 } from 'lucide-react';
 import './styles/global.css';
@@ -74,6 +76,28 @@ function AppRoutes() {
           <ProtectedRoute>
             <div className="container">
               <Summary />
+            </div>
+            <NavBar />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/history"
+        element={
+          <ProtectedRoute>
+            <div className="container">
+              <History />
+            </div>
+            <NavBar />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <div className="container">
+              <Dashboard />
             </div>
             <NavBar />
           </ProtectedRoute>

@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, TrendingUp, TrendingDown, BarChart3, LogOut } from 'lucide-react';
+import { Home, TrendingUp, TrendingDown, CalendarDays, LayoutDashboard, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import './NavBar.css';
 
@@ -31,9 +31,14 @@ export function NavBar() {
         <span className="nav-label">รายจ่าย</span>
       </NavLink>
       
-      <NavLink to="/summary" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-        <BarChart3 className="nav-icon" />
-        <span className="nav-label">สรุป</span>
+      <NavLink to="/history" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+        <CalendarDays className="nav-icon" />
+        <span className="nav-label">ย้อนหลัง</span>
+      </NavLink>
+
+      <NavLink to="/dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+        <LayoutDashboard className="nav-icon" />
+        <span className="nav-label">ภาพรวม</span>
       </NavLink>
 
       <button className="nav-item logout" onClick={handleLogout} title={`ออกจากระบบ (${user?.name})`}>
