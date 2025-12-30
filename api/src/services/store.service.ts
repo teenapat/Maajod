@@ -7,9 +7,29 @@ export interface CreateStoreInput {
   description?: string;
 }
 
-export interface StoreWithRole extends IStore {
+// Plain object types (for .lean() results)
+export interface StoreData {
+  _id: Types.ObjectId;
+  name: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface StoreWithRole extends StoreData {
   userRole: StoreRole;
   isDefault: boolean;
+}
+
+export interface UserStoreData {
+  _id: Types.ObjectId;
+  userId: Types.ObjectId | { _id: Types.ObjectId; username: string; name: string; role: string };
+  storeId: Types.ObjectId;
+  role: StoreRole;
+  isDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export class StoreService {
@@ -36,11 +56,11 @@ export class StoreService {
   // ดึงร้านทั้งหมดของ user
   async getStoresByUserId(userId: string): Promise<StoreWithRole[]> {
     const userStores = await UserStore.find({ userId: new Types.ObjectId(userId) })
-      .populate<{ storeId: IStore }>('storeId')
+      .populate<{ storeId: StoreData }>('storeId')
       .lean();
 
     return userStores.map((us) => ({
-      ...(us.storeId as IStore),
+      ...us.storeId,
       userRole: us.role,
       isDefault: us.isDefault,
     }));
@@ -91,10 +111,10 @@ export class StoreService {
   }
 
   // ดึง users ทั้งหมดในร้าน
-  async getUsersInStore(storeId: string): Promise<IUserStore[]> {
+  async getUsersInStore(storeId: string): Promise<UserStoreData[]> {
     return UserStore.find({ storeId: new Types.ObjectId(storeId) })
       .populate('userId', '-password')
-      .lean();
+      .lean() as Promise<UserStoreData[]>;
   }
 
   // ตรวจสอบว่า user มีสิทธิ์เข้าถึงร้านหรือไม่
@@ -130,4 +150,3 @@ export class StoreService {
 }
 
 export const storeService = new StoreService();
-
