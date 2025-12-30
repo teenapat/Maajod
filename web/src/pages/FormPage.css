@@ -91,3 +91,30 @@
 .form-success p {
   color: var(--color-text-light);
 }
+
+/* No store state */
+.form-no-store {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: var(--spacing-md);
+}
+
+.form-no-store .no-store-icon {
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-md);
+}
+
+.form-no-store h2 {
+  font-size: var(--font-size-xl);
+  color: var(--color-text);
+  margin-bottom: var(--spacing-xs);
+}
+
+.form-no-store p {
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-lg);
+}

@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, CheckCircle } from 'lucide-react';
+import { TrendingUp, CheckCircle, AlertTriangle } from 'lucide-react';
 import { api } from '../services/api';
 import { Input, TextArea } from '../components/Input';
 import { Button } from '../components/Button';
+import { useAuth } from '../contexts/AuthContext';
 import { getToday } from '../utils/date';
 import './FormPage.css';
 
 export function Income() {
   const navigate = useNavigate();
+  const { currentStore } = useAuth();
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(getToday());
   const [note, setNote] = useState('');
@@ -19,6 +21,11 @@ export function Income() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!currentStore) {
+      setError('กรุณาเลือกร้านค้าก่อน');
+      return;
+    }
+
     if (!amount || Number(amount) <= 0) {
       setError('กรุณาใส่จำนวนเงิน');
       return;
@@ -54,6 +61,22 @@ export function Income() {
     );
   }
 
+  // ถ้ายังไม่มีร้าน
+  if (!currentStore) {
+    return (
+      <div className="form-page">
+        <div className="form-no-store">
+          <AlertTriangle size={64} className="no-store-icon" />
+          <h2>ไม่มีร้านค้า</h2>
+          <p>กรุณาเลือกร้านค้าก่อนเพิ่มรายการ</p>
+          <Button variant="primary" onClick={() => navigate('/')}>
+            กลับหน้าหลัก
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="form-page">
       <header className="form-header income">
@@ -61,7 +84,7 @@ export function Income() {
           <TrendingUp size={32} />
         </div>
         <h1 className="form-title">เพิ่มรายรับ</h1>
-        <p className="form-subtitle">ลูกค้าซื้อข้าว</p>
+        <p className="form-subtitle">{currentStore.name}</p>
       </header>
 
       <form onSubmit={handleSubmit} className="form-card">

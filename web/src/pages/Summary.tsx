@@ -3,12 +3,15 @@ import { useEffect, useState } from 'react';
 import { Button } from '../components/Button';
 import { SummaryCard } from '../components/SummaryCard';
 import { TransactionList } from '../components/TransactionList';
+import { StoreSelector } from '../components/StoreSelector';
+import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { Summary as SummaryType } from '../types/transaction';
 import { getThaiMonthName } from '../utils/date';
 import './Summary.css';
 
 export function Summary() {
+  const { currentStore } = useAuth();
   const [summary, setSummary] = useState<SummaryType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -18,6 +21,11 @@ export function Summary() {
   const [month, setMonth] = useState(now.getMonth() + 1);
 
   const fetchData = async () => {
+    if (!currentStore) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError('');
@@ -32,7 +40,7 @@ export function Summary() {
 
   useEffect(() => {
     fetchData();
-  }, [year, month]);
+  }, [year, month, currentStore?._id]);
 
   const handlePrevMonth = () => {
     if (month === 1) {
@@ -68,6 +76,7 @@ export function Summary() {
       <header className="summary-header">
         <BarChart3 size={32} className="summary-header-icon" />
         <h1 className="summary-page-title">สรุปรายเดือน</h1>
+        <StoreSelector onStoreChange={fetchData} />
       </header>
 
       <div className="month-selector">

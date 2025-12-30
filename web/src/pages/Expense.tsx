@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingDown, CheckCircle } from 'lucide-react';
+import { TrendingDown, CheckCircle, AlertTriangle } from 'lucide-react';
 import { api } from '../services/api';
 import { ExpenseCategory, CATEGORY_LABELS } from '../types/transaction';
 import { Input, Select, TextArea } from '../components/Input';
 import { Button } from '../components/Button';
+import { useAuth } from '../contexts/AuthContext';
 import { getToday } from '../utils/date';
 import './FormPage.css';
 
@@ -15,6 +16,7 @@ const CATEGORY_OPTIONS = Object.entries(CATEGORY_LABELS).map(([value, label]) =>
 
 export function Expense() {
   const navigate = useNavigate();
+  const { currentStore } = useAuth();
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState<ExpenseCategory | ''>('');
   const [date, setDate] = useState(getToday());
@@ -26,6 +28,11 @@ export function Expense() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!currentStore) {
+      setError('กรุณาเลือกร้านค้าก่อน');
+      return;
+    }
+
     if (!amount || Number(amount) <= 0) {
       setError('กรุณาใส่จำนวนเงิน');
       return;
@@ -67,6 +74,22 @@ export function Expense() {
     );
   }
 
+  // ถ้ายังไม่มีร้าน
+  if (!currentStore) {
+    return (
+      <div className="form-page">
+        <div className="form-no-store">
+          <AlertTriangle size={64} className="no-store-icon" />
+          <h2>ไม่มีร้านค้า</h2>
+          <p>กรุณาเลือกร้านค้าก่อนเพิ่มรายการ</p>
+          <Button variant="primary" onClick={() => navigate('/')}>
+            กลับหน้าหลัก
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="form-page">
       <header className="form-header expense">
@@ -74,7 +97,7 @@ export function Expense() {
           <TrendingDown size={32} />
         </div>
         <h1 className="form-title">เพิ่มรายจ่าย</h1>
-        <p className="form-subtitle">ค่าใช้จ่ายร้าน</p>
+        <p className="form-subtitle">{currentStore.name}</p>
       </header>
 
       <form onSubmit={handleSubmit} className="form-card">

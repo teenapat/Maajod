@@ -1,6 +1,8 @@
 import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Loader2, TrendingDown, TrendingUp, Wallet, X, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '../components/Button';
+import { StoreSelector } from '../components/StoreSelector';
+import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { Transaction } from '../types/transaction';
 import { formatMoney, formatThaiDate, getThaiMonthName } from '../utils/date';
@@ -43,6 +45,7 @@ function groupTransactionsByDate(transactions: Transaction[]): DailySummary[] {
 }
 
 export function History() {
+  const { currentStore } = useAuth();
   const [dailySummaries, setDailySummaries] = useState<DailySummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -53,6 +56,11 @@ export function History() {
   const [month, setMonth] = useState(now.getMonth() + 1);
 
   const fetchData = async () => {
+    if (!currentStore) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError('');
@@ -67,7 +75,7 @@ export function History() {
 
   useEffect(() => {
     fetchData();
-  }, [year, month]);
+  }, [year, month, currentStore?._id]);
 
   const handlePrevMonth = () => {
     if (month === 1) {
@@ -107,6 +115,7 @@ export function History() {
       <header className="history-header">
         <CalendarDays size={32} className="history-header-icon" />
         <h1 className="history-page-title">ย้อนหลังรายวัน</h1>
+        <StoreSelector onStoreChange={fetchData} />
       </header>
 
       <div className="month-selector">
@@ -217,4 +226,3 @@ export function History() {
     </div>
   );
 }
-

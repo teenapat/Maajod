@@ -4,17 +4,25 @@ import { Link } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { SummaryCard } from '../components/SummaryCard';
 import { TransactionList } from '../components/TransactionList';
+import { StoreSelector } from '../components/StoreSelector';
+import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { Summary } from '../types/transaction';
 import { formatThaiDate, getToday } from '../utils/date';
 import './Home.css';
 
 export function Home() {
+  const { currentStore } = useAuth();
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const fetchData = async () => {
+    if (!currentStore) {
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       setError('');
@@ -29,7 +37,7 @@ export function Home() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [currentStore?._id]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('ต้องการลบรายการนี้?')) return;
@@ -51,6 +59,23 @@ export function Home() {
     );
   }
 
+  // ถ้ายังไม่มีร้าน
+  if (!currentStore) {
+    return (
+      <div className="home">
+        <header className="home-header">
+          <div className="home-logo">
+            <Receipt size={40} />
+          </div>
+          <h1 className="home-title">แม่จด</h1>
+        </header>
+        <div className="message message-error">
+          คุณยังไม่มีร้านค้า กรุณาติดต่อผู้ดูแลระบบ
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="home">
       <header className="home-header">
@@ -58,6 +83,7 @@ export function Home() {
           <Receipt size={40} />
         </div>
         <h1 className="home-title">แม่จด</h1>
+        <StoreSelector onStoreChange={fetchData} />
         <p className="home-date">{formatThaiDate(getToday())}</p>
       </header>
 

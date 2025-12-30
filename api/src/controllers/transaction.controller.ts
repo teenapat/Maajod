@@ -1,10 +1,11 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { transactionService } from '../services/transaction.service';
 import { parseDate } from '../utils/date';
+import { AuthRequest } from '../middleware/auth.middleware';
 
 export class TransactionController {
   // POST /api/transactions
-  async create(req: Request, res: Response): Promise<void> {
+  async create(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { type, amount, category, note, date } = req.body;
 
@@ -13,7 +14,13 @@ export class TransactionController {
         return;
       }
 
+      if (!req.storeId) {
+        res.status(400).json({ error: 'Store ID is required' });
+        return;
+      }
+
       const transaction = await transactionService.createTransaction({
+        storeId: req.storeId,
         type,
         amount: Number(amount),
         category,
@@ -29,7 +36,7 @@ export class TransactionController {
   }
 
   // GET /api/transactions?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
-  async getByDateRange(req: Request, res: Response): Promise<void> {
+  async getByDateRange(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { startDate, endDate } = req.query;
 
@@ -38,7 +45,13 @@ export class TransactionController {
         return;
       }
 
+      if (!req.storeId) {
+        res.status(400).json({ error: 'Store ID is required' });
+        return;
+      }
+
       const transactions = await transactionService.getTransactionsByDateRange(
+        req.storeId,
         parseDate(startDate as string),
         parseDate(endDate as string)
       );
@@ -51,12 +64,17 @@ export class TransactionController {
   }
 
   // GET /api/summary/daily?date=YYYY-MM-DD
-  async getDailySummary(req: Request, res: Response): Promise<void> {
+  async getDailySummary(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { date } = req.query;
 
+      if (!req.storeId) {
+        res.status(400).json({ error: 'Store ID is required' });
+        return;
+      }
+
       const targetDate = date ? parseDate(date as string) : new Date();
-      const summary = await transactionService.getDailySummary(targetDate);
+      const summary = await transactionService.getDailySummary(req.storeId, targetDate);
 
       res.json(summary);
     } catch (error) {
@@ -66,9 +84,14 @@ export class TransactionController {
   }
 
   // GET /api/summary/monthly?year=YYYY&month=MM
-  async getMonthlySummary(req: Request, res: Response): Promise<void> {
+  async getMonthlySummary(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { year, month } = req.query;
+
+      if (!req.storeId) {
+        res.status(400).json({ error: 'Store ID is required' });
+        return;
+      }
 
       const now = new Date();
       const targetYear = year ? Number(year) : now.getFullYear();
@@ -79,7 +102,7 @@ export class TransactionController {
         return;
       }
 
-      const summary = await transactionService.getMonthlySummary(targetYear, targetMonth);
+      const summary = await transactionService.getMonthlySummary(req.storeId, targetYear, targetMonth);
 
       res.json(summary);
     } catch (error) {
@@ -89,10 +112,16 @@ export class TransactionController {
   }
 
   // DELETE /api/transactions/:id
-  async delete(req: Request, res: Response): Promise<void> {
+  async delete(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const transaction = await transactionService.deleteTransaction(id);
+
+      if (!req.storeId) {
+        res.status(400).json({ error: 'Store ID is required' });
+        return;
+      }
+
+      const transaction = await transactionService.deleteTransaction(id, req.storeId);
 
       if (!transaction) {
         res.status(404).json({ error: 'Transaction not found' });

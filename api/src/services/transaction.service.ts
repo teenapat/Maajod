@@ -14,6 +14,11 @@ export interface Summary {
 
 export class TransactionService {
   async createTransaction(data: CreateTransactionInput): Promise<ITransaction> {
+    // Validate storeId
+    if (!data.storeId) {
+      throw new Error('Store ID is required');
+    }
+
     // Validate expense must have category
     if (data.type === 'expense' && !data.category) {
       throw new Error('Category is required for expense');
@@ -28,26 +33,27 @@ export class TransactionService {
   }
 
   async getTransactionsByDateRange(
+    storeId: string,
     startDate: Date,
     endDate: Date
   ): Promise<ITransaction[]> {
-    return transactionRepository.findByDateRange(startDate, endDate);
+    return transactionRepository.findByDateRange(storeId, startDate, endDate);
   }
 
-  async getDailySummary(date: Date): Promise<Summary> {
+  async getDailySummary(storeId: string, date: Date): Promise<Summary> {
     const { start, end } = getDayRange(date);
-    return this.getSummary(start, end);
+    return this.getSummary(storeId, start, end);
   }
 
-  async getMonthlySummary(year: number, month: number): Promise<Summary> {
+  async getMonthlySummary(storeId: string, year: number, month: number): Promise<Summary> {
     const { start, end } = getMonthRange(year, month);
-    return this.getSummary(start, end);
+    return this.getSummary(storeId, start, end);
   }
 
-  private async getSummary(startDate: Date, endDate: Date): Promise<Summary> {
+  private async getSummary(storeId: string, startDate: Date, endDate: Date): Promise<Summary> {
     const [aggregated, transactions] = await Promise.all([
-      transactionRepository.aggregateByDateRange(startDate, endDate),
-      transactionRepository.findByDateRange(startDate, endDate),
+      transactionRepository.aggregateByDateRange(storeId, startDate, endDate),
+      transactionRepository.findByDateRange(storeId, startDate, endDate),
     ]);
 
     let totalIncome = 0;
@@ -69,8 +75,8 @@ export class TransactionService {
     };
   }
 
-  async deleteTransaction(id: string): Promise<ITransaction | null> {
-    return transactionRepository.delete(id);
+  async deleteTransaction(id: string, storeId: string): Promise<ITransaction | null> {
+    return transactionRepository.delete(id, storeId);
   }
 }
 

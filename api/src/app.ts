@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes';
 import transactionRoutes from './routes/transaction.routes';
-import { authMiddleware } from './middleware/auth.middleware';
+import storeRoutes from './routes/store.routes';
+import { authMiddleware, storeAccessMiddleware } from './middleware/auth.middleware';
 
 const app = express();
 
@@ -13,8 +14,11 @@ app.use(express.json());
 // Public routes
 app.use('/api/auth', authRoutes);
 
-// Protected routes
-app.use('/api', authMiddleware, transactionRoutes);
+// Protected routes - Store management (ไม่ต้องใช้ storeAccessMiddleware)
+app.use('/api/stores', authMiddleware, storeRoutes);
+
+// Protected routes - Transaction (ต้อง auth + store access)
+app.use('/api', authMiddleware, storeAccessMiddleware, transactionRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

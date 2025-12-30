@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { User } from '../models/user.model';
 import { generateToken, AuthRequest } from '../middleware/auth.middleware';
+import { storeService } from '../services/store.service';
 
 export class AuthController {
   // POST /api/auth/login
@@ -27,6 +28,9 @@ export class AuthController {
         return;
       }
 
+      // ดึงร้านทั้งหมดของ user
+      const stores = await storeService.getStoresByUserId(user._id.toString());
+
       const token = generateToken({
         id: user._id.toString(),
         username: user.username,
@@ -42,6 +46,7 @@ export class AuthController {
           name: user.name,
           role: user.role,
         },
+        stores,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -92,7 +97,23 @@ export class AuthController {
 
   // GET /api/auth/me
   async me(req: AuthRequest, res: Response): Promise<void> {
-    res.json({ user: req.user });
+    try {
+      if (!req.user?.id) {
+        res.status(401).json({ error: 'กรุณาเข้าสู่ระบบ' });
+        return;
+      }
+
+      // ดึงร้านทั้งหมดของ user
+      const stores = await storeService.getStoresByUserId(req.user.id);
+
+      res.json({
+        user: req.user,
+        stores,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      res.status(500).json({ error: message });
+    }
   }
 }
 

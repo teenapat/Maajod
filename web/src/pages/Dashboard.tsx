@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '../components/Button';
+import { StoreSelector } from '../components/StoreSelector';
+import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { Summary, Transaction } from '../types/transaction';
 import { formatMoney, formatThaiDate, getThaiMonthName } from '../utils/date';
@@ -57,6 +59,7 @@ function getMaxExpenseDay(dayStats: DayStats[]): DayStats | null {
 }
 
 export function Dashboard() {
+  const { currentStore } = useAuth();
   const [currentSummary, setCurrentSummary] = useState<Summary | null>(null);
   const [prevSummary, setPrevSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,6 +70,11 @@ export function Dashboard() {
   const [month, setMonth] = useState(now.getMonth() + 1);
 
   const fetchData = async () => {
+    if (!currentStore) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError('');
@@ -89,7 +97,7 @@ export function Dashboard() {
 
   useEffect(() => {
     fetchData();
-  }, [year, month]);
+  }, [year, month, currentStore?._id]);
 
   const handlePrevMonth = () => {
     if (month === 1) {
@@ -128,6 +136,7 @@ export function Dashboard() {
       <header className="dashboard-header">
         <LayoutDashboard size={32} className="dashboard-header-icon" />
         <h1 className="dashboard-page-title">ภาพรวมร้าน</h1>
+        <StoreSelector onStoreChange={fetchData} />
       </header>
 
       <div className="month-selector">
@@ -315,4 +324,3 @@ export function Dashboard() {
     </div>
   );
 }
-

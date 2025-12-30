@@ -1,9 +1,10 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export type TransactionType = 'income' | 'expense';
 export type ExpenseCategory = 'ingredients' | 'supplies' | 'utilities' | 'other';
 
 export interface ITransaction extends Document {
+  storeId: Types.ObjectId;
   type: TransactionType;
   amount: number;
   category?: ExpenseCategory;
@@ -15,6 +16,12 @@ export interface ITransaction extends Document {
 
 const TransactionSchema = new Schema<ITransaction>(
   {
+    storeId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Store',
+      required: true,
+      index: true,
+    },
     type: {
       type: String,
       enum: ['income', 'expense'],
@@ -45,5 +52,8 @@ const TransactionSchema = new Schema<ITransaction>(
     timestamps: true,
   }
 );
+
+// Compound index สำหรับ query by store และ date
+TransactionSchema.index({ storeId: 1, date: -1 });
 
 export const Transaction = mongoose.model<ITransaction>('Transaction', TransactionSchema);

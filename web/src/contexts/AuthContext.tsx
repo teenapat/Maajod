@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { API_BASE } from '../services/api';
+import { Store } from '../types/store';
 
 interface User {
   id: string;
@@ -11,8 +12,11 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  stores: Store[];
+  currentStore: Store | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
+  switchStore: (storeId: string) => void;
   isLoading: boolean;
 }
 
@@ -33,16 +37,43 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [stores, setStores] = useState<Store[]>([]);
+  const [currentStore, setCurrentStore] = useState<Store | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // โหลด token จาก localStorage ตอนเริ่มต้น
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
+    const savedStores = localStorage.getItem('stores');
+    const savedCurrentStoreId = localStorage.getItem('currentStoreId');
 
     if (savedToken && savedUser) {
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
+
+      if (savedStores) {
+        const parsedStores: Store[] = JSON.parse(savedStores);
+        setStores(parsedStores);
+
+        // หา current store จาก savedCurrentStoreId หรือใช้ default
+        if (savedCurrentStoreId) {
+          const found = parsedStores.find(s => s._id === savedCurrentStoreId);
+          if (found) {
+            setCurrentStore(found);
+          } else if (parsedStores.length > 0) {
+            // ถ้าไม่เจอ ใช้ default หรือตัวแรก
+            const defaultStore = parsedStores.find(s => s.isDefault) || parsedStores[0];
+            setCurrentStore(defaultStore);
+            localStorage.setItem('currentStoreId', defaultStore._id);
+          }
+        } else if (parsedStores.length > 0) {
+          // ยังไม่เคยเลือกร้าน ใช้ default หรือตัวแรก
+          const defaultStore = parsedStores.find(s => s.isDefault) || parsedStores[0];
+          setCurrentStore(defaultStore);
+          localStorage.setItem('currentStoreId', defaultStore._id);
+        }
+      }
     }
     setIsLoading(false);
   }, []);
@@ -63,19 +94,41 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     setToken(data.token);
     setUser(data.user);
+    setStores(data.stores || []);
+
+    // เลือกร้าน default หรือตัวแรก
+    if (data.stores && data.stores.length > 0) {
+      const defaultStore = data.stores.find((s: Store) => s.isDefault) || data.stores[0];
+      setCurrentStore(defaultStore);
+      localStorage.setItem('currentStoreId', defaultStore._id);
+    }
+
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('stores', JSON.stringify(data.stores || []));
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
+    setStores([]);
+    setCurrentStore(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('stores');
+    localStorage.removeItem('currentStoreId');
+  };
+
+  const switchStore = (storeId: string) => {
+    const store = stores.find(s => s._id === storeId);
+    if (store) {
+      setCurrentStore(store);
+      localStorage.setItem('currentStoreId', storeId);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, stores, currentStore, login, logout, switchStore, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

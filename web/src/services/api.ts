@@ -1,4 +1,5 @@
 import { CreateTransactionInput, Summary, Transaction } from '../types/transaction';
+import { Store } from '../types/store';
 
 // ใช้ env variable สำหรับ API URL
 // - Local: ใช้ proxy ผ่าน vite (VITE_API_URL ว่าง หรือไม่ได้ตั้ง)
@@ -8,9 +9,12 @@ export const API_BASE = import.meta.env.VITE_API_URL || '';
 
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem('token');
+  const storeId = localStorage.getItem('currentStoreId');
+  
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(storeId ? { 'X-Store-Id': storeId } : {}),
   };
 }
 
@@ -19,6 +23,8 @@ async function handleResponse<T>(response: Response): Promise<T> {
     // Token หมดอายุ หรือไม่ถูกต้อง
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('stores');
+    localStorage.removeItem('currentStoreId');
     window.location.href = '/login';
     throw new Error('กรุณาเข้าสู่ระบบใหม่');
   }
@@ -66,6 +72,35 @@ export const api = {
   async deleteTransaction(id: string): Promise<void> {
     const response = await fetch(`${API_BASE}/api/transactions/${id}`, {
       method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    return handleResponse<void>(response);
+  },
+
+  // ===== Store API =====
+
+  // ดึงร้านทั้งหมดของ user
+  async getMyStores(): Promise<Store[]> {
+    const response = await fetch(`${API_BASE}/api/stores`, {
+      headers: getAuthHeaders(),
+    });
+    return handleResponse<Store[]>(response);
+  },
+
+  // สร้างร้านใหม่
+  async createStore(name: string, description?: string): Promise<{ store: Store }> {
+    const response = await fetch(`${API_BASE}/api/stores`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ name, description }),
+    });
+    return handleResponse<{ store: Store }>(response);
+  },
+
+  // ตั้งร้าน default
+  async setDefaultStore(storeId: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/api/stores/${storeId}/default`, {
+      method: 'PUT',
       headers: getAuthHeaders(),
     });
     return handleResponse<void>(response);
