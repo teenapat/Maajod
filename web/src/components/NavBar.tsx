@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, TrendingUp, TrendingDown, CalendarDays, LayoutDashboard, LogOut } from 'lucide-react';
+import { Home, TrendingUp, TrendingDown, CalendarDays, LayoutDashboard, LogOut, Receipt } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import './NavBar.css';
 
@@ -16,6 +16,14 @@ export function NavBar() {
 
   return (
     <nav className="navbar">
+      {/* App title - แสดงเฉพาะ desktop */}
+      <div className="nav-app-title">
+        <div className="nav-app-logo">
+          <Receipt size={24} />
+        </div>
+        <span className="nav-app-name">แม่จด</span>
+      </div>
+
       <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
         <Home className="nav-icon" />
         <span className="nav-label">หน้าหลัก</span>

@@ -1,96 +1,209 @@
-.home {
-  padding-bottom: 100px;
-}
+  /* ===== Mobile Layout ===== */
+  .home {
+    padding-bottom: 100px;
+  }
 
-.home-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  gap: var(--spacing-md);
-  color: var(--color-text-light);
-}
+  .home-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: var(--spacing-md);
+    color: var(--color-text-light);
+  }
 
-.spinner-icon {
-  animation: spin 1s linear infinite;
-  color: var(--color-primary);
-}
+  @media (min-width: 768px) {
+    .home-loading {
+      margin-left: var(--sidebar-width);
+    }
+  }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+  .spinner-icon {
+    animation: spin 1s linear infinite;
+    color: var(--color-primary);
+  }
 
-.home-header {
-  text-align: center;
-  padding: var(--spacing-lg) 0 var(--spacing-md);
-}
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 
-.home-logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
-  color: white;
-  border-radius: var(--radius-lg);
-  margin-bottom: var(--spacing-sm);
-  box-shadow: 0 4px 12px rgba(45, 90, 39, 0.3);
-}
+  .home-header {
+    text-align: center;
+    padding: var(--spacing-lg) 0 var(--spacing-md);
+  }
 
-.home-title {
-  font-size: var(--font-size-xxl);
-  font-weight: 700;
-  color: var(--color-primary-dark);
-  margin-bottom: 4px;
-}
+  .home-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+    color: white;
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--spacing-sm);
+    box-shadow: 0 4px 12px rgba(45, 90, 39, 0.3);
+  }
 
-.home-greeting {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--font-size-md);
-  color: var(--color-primary);
-  font-weight: 600;
-  margin-bottom: var(--spacing-xs);
-}
+  .home-title {
+    font-size: var(--font-size-xxl);
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    margin-bottom: 4px;
+  }
 
-.home-date {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-light);
-  margin-top: var(--spacing-xs);
-}
+  .home-greeting {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--font-size-md);
+    color: var(--color-primary);
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+  }
 
-.home-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: min(3vw, 16px);
-  margin-top: var(--spacing-md);
-}
+  .home-store-selector {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+  }
 
-.home-actions a {
-  text-decoration: none;
-}
+  .home-date {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    margin-top: var(--spacing-xs);
+  }
 
-.home-transactions {
-  margin-top: var(--spacing-lg);
-}
+  .home-content {
+    display: flex;
+    flex-direction: column;
+  }
 
-.section-title {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--color-primary-dark);
-  margin-bottom: var(--spacing-md);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
+  .home-main {
+    display: flex;
+    flex-direction: column;
+  }
 
-.section-title::before {
-  content: '';
-  width: 4px;
-  height: 24px;
-  background: var(--color-primary);
-  border-radius: 2px;
-}
+  .home-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: min(3vw, 16px);
+    margin-top: var(--spacing-md);
+  }
+
+  .home-actions a {
+    text-decoration: none;
+  }
+
+  .home-transactions {
+    margin-top: var(--spacing-lg);
+  }
+
+  .section-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .section-title::before {
+    content: '';
+    width: 4px;
+    height: 24px;
+    background: var(--color-primary);
+    border-radius: 2px;
+  }
+
+  /* ===== Desktop Layout ===== */
+  @media (min-width: 768px) {
+    .home {
+      padding-bottom: var(--spacing-lg);
+    }
+
+    /* ซ่อน logo และ title บน desktop (แสดงใน sidebar แล้ว) */
+    .home-logo,
+    .home-title {
+      display: none;
+    }
+
+    .home-header {
+      text-align: left;
+      padding: var(--spacing-md) 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .home-greeting {
+      margin-bottom: 0;
+      font-size: var(--font-size-lg);
+    }
+
+    .home-date {
+      margin-top: 0;
+      margin-left: auto;
+      font-size: var(--font-size-md);
+    }
+
+    /* 2 columns layout - centered with equal spacing */
+    .home-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-lg);
+      align-items: start;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .home-main {
+      position: sticky;
+      top: var(--spacing-md);
+    }
+
+    .home-transactions {
+      margin-top: 0;
+      max-height: calc(100vh - 180px);
+      overflow-y: auto;
+      padding-right: var(--spacing-sm);
+    }
+
+    /* Custom scrollbar */
+    .home-transactions::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .home-transactions::-webkit-scrollbar-track {
+      background: var(--color-bg);
+      border-radius: 3px;
+    }
+
+    .home-transactions::-webkit-scrollbar-thumb {
+      background: var(--color-border);
+      border-radius: 3px;
+    }
+
+    .home-transactions::-webkit-scrollbar-thumb:hover {
+      background: var(--color-text-light);
+    }
+  }
+
+  /* ===== Large Desktop ===== */
+  @media (min-width: 1200px) {
+    .home-content {
+      max-width: 1100px;
+    }
+  }
+
+  /* ===== Extra Large Desktop (1600px+) ===== */
+  @media (min-width: 1600px) {
+    .home-content {
+      max-width: none;
+      gap: var(--spacing-xl);
+    }
+  }

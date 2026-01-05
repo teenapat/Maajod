@@ -1,10 +1,10 @@
+import { AlertTriangle, CheckCircle, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, CheckCircle, AlertTriangle } from 'lucide-react';
-import { api } from '../services/api';
-import { Input, TextArea } from '../components/Input';
 import { Button } from '../components/Button';
+import { Input, TextArea } from '../components/Input';
 import { useAuth } from '../contexts/AuthContext';
+import { api } from '../services/api';
 import { getToday } from '../utils/date';
 import './FormPage.css';
 
@@ -20,7 +20,7 @@ export function Income() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!currentStore) {
       setError('กรุณาเลือกร้านค้าก่อน');
       return;
@@ -34,7 +34,7 @@ export function Income() {
     try {
       setLoading(true);
       setError('');
-      
+
       await api.createTransaction({
         type: 'income',
         amount: Number(amount),
@@ -83,8 +83,10 @@ export function Income() {
         <div className="form-header-icon">
           <TrendingUp size={32} />
         </div>
-        <h1 className="form-title">เพิ่มรายรับ</h1>
-        <p className="form-subtitle">{currentStore.name}</p>
+        <div className="form-header-info">
+          <h1 className="form-title">เพิ่มรายรับ</h1>
+          <p className="form-subtitle">{currentStore.name}</p>
+        </div>
       </header>
 
       <form onSubmit={handleSubmit} className="form-card">

@@ -90,7 +90,9 @@ export function Home() {
             <Sparkles size={16} />
           </p>
         )}
-        <StoreSelector onStoreChange={fetchData} />
+        <div className="home-store-selector">
+          <StoreSelector onStoreChange={fetchData} />
+        </div>
         <p className="home-date">{formatThaiDate(getToday())}</p>
       </header>
 
@@ -99,29 +101,33 @@ export function Home() {
       )}
 
       {summary && (
-        <>
-          <SummaryCard
-            title="สรุปวันนี้"
-            totalIncome={summary.totalIncome}
-            totalExpense={summary.totalExpense}
-            net={summary.net}
-          />
+        <div className="home-content">
+          {/* Left column: Summary + Actions */}
+          <div className="home-main">
+            <SummaryCard
+              title="สรุปวันนี้"
+              totalIncome={summary.totalIncome}
+              totalExpense={summary.totalExpense}
+              net={summary.net}
+            />
 
-          <div className="home-actions">
-            <Link to="/income">
-              <Button variant="income" size="lg" fullWidth>
-                <TrendingUp size={24} />
-                เพิ่มรายรับ
-              </Button>
-            </Link>
-            <Link to="/expense">
-              <Button variant="expense" size="lg" fullWidth>
-                <TrendingDown size={24} />
-                เพิ่มรายจ่าย
-              </Button>
-            </Link>
+            <div className="home-actions">
+              <Link to="/income">
+                <Button variant="income" size="lg" fullWidth>
+                  <TrendingUp size={24} />
+                  เพิ่มรายรับ
+                </Button>
+              </Link>
+              <Link to="/expense">
+                <Button variant="expense" size="lg" fullWidth>
+                  <TrendingDown size={24} />
+                  เพิ่มรายจ่าย
+                </Button>
+              </Link>
+            </div>
           </div>
 
+          {/* Right column: Transaction List */}
           <section className="home-transactions">
             <h2 className="section-title">รายการวันนี้</h2>
             <TransactionList
@@ -129,7 +135,7 @@ export function Home() {
               onDelete={handleDelete}
             />
           </section>
-        </>
+        </div>
       )}
     </div>
   );

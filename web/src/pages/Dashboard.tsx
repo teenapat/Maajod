@@ -1,32 +1,66 @@
 import {
   AlertTriangle,
-  ArrowDownRight,
-  ArrowUpRight,
-  Award,
-  CalendarDays,
   ChevronLeft,
   ChevronRight,
   LayoutDashboard,
   Loader2,
+  PieChart as PieChartIcon,
   Sparkles,
   TrendingDown,
   TrendingUp,
   Wallet
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from 'recharts';
 import { Button } from '../components/Button';
 import { StoreSelector } from '../components/StoreSelector';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
-import { Summary, Transaction } from '../types/transaction';
-import { formatMoney, formatThaiDate, getThaiMonthName } from '../utils/date';
+import { CATEGORY_LABELS, ExpenseCategory, Summary, Transaction } from '../types/transaction';
+import { formatMoney, getThaiMonthName } from '../utils/date';
 import './Dashboard.css';
 
 interface DayStats {
   date: string;
   income: number;
   expense: number;
+  net: number;
+  dayNum: number;
 }
+
+interface CategoryStats {
+  name: string;
+  value: number;
+  category: ExpenseCategory;
+  [key: string]: string | number; // Index signature for recharts
+}
+
+// Colors for charts
+const COLORS = {
+  income: '#2D5A27',
+  expense: '#DC3545',
+  net: '#4A7C59',
+  categories: {
+    ingredients: '#2D5A27',
+    supplies: '#4A7C59',
+    utilities: '#6B9B5E',
+    other: '#8FBC8F',
+  }
+};
 
 function getDayStats(transactions: Transaction[]): DayStats[] {
   const grouped: Record<string, { income: number; expense: number }> = {};
@@ -44,24 +78,73 @@ function getDayStats(transactions: Transaction[]): DayStats[] {
   });
 
   return Object.entries(grouped)
-    .map(([date, stats]) => ({ date, ...stats }))
-    .sort((a, b) => b.date.localeCompare(a.date));
+    .map(([date, stats]) => {
+      const dateObj = new Date(date + 'T00:00:00');
+      return {
+        date,
+        ...stats,
+        net: stats.income - stats.expense,
+        dayNum: dateObj.getDate(),
+      };
+    })
+    .sort((a, b) => a.date.localeCompare(b.date)); // Sort ascending for charts
 }
 
-function getMaxIncomeDay(dayStats: DayStats[]): DayStats | null {
-  if (dayStats.length === 0) return null;
-  return dayStats.reduce((max, day) => day.income > max.income ? day : max, dayStats[0]);
+function getCategoryStats(transactions: Transaction[]): CategoryStats[] {
+  const grouped: Record<ExpenseCategory, number> = {
+    ingredients: 0,
+    supplies: 0,
+    utilities: 0,
+    other: 0,
+  };
+
+  transactions.forEach(tx => {
+    if (tx.type === 'expense' && tx.category) {
+      grouped[tx.category] += tx.amount;
+    }
+  });
+
+  return Object.entries(grouped)
+    .filter(([, value]) => value > 0)
+    .map(([category, value]) => ({
+      name: CATEGORY_LABELS[category as ExpenseCategory],
+      value,
+      category: category as ExpenseCategory,
+    }));
 }
 
-function getMaxExpenseDay(dayStats: DayStats[]): DayStats | null {
-  if (dayStats.length === 0) return null;
-  return dayStats.reduce((max, day) => day.expense > max.expense ? day : max, dayStats[0]);
-}
+// Custom tooltip for charts
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="chart-tooltip">
+        <p className="chart-tooltip-label">วันที่ {label}</p>
+        {payload.map((entry, index) => (
+          <p key={index} style={{ color: entry.color }}>
+            {entry.name}: {formatMoney(entry.value)}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
+// Custom tooltip for pie chart
+const PieTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number }> }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="chart-tooltip">
+        <p>{payload[0].name}: {formatMoney(payload[0].value)}</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export function Dashboard() {
   const { currentStore } = useAuth();
   const [currentSummary, setCurrentSummary] = useState<Summary | null>(null);
-  const [prevSummary, setPrevSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -82,12 +165,6 @@ export function Dashboard() {
       // Fetch current month
       const current = await api.getMonthlySummary(year, month);
       setCurrentSummary(current);
-
-      // Fetch previous month
-      const prevMonth = month === 1 ? 12 : month - 1;
-      const prevYear = month === 1 ? year - 1 : year;
-      const prev = await api.getMonthlySummary(prevYear, prevMonth);
-      setPrevSummary(prev);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');
     } finally {
@@ -118,18 +195,7 @@ export function Dashboard() {
   };
 
   const dayStats = currentSummary ? getDayStats(currentSummary.transactions) : [];
-  const maxIncomeDay = getMaxIncomeDay(dayStats);
-  const maxExpenseDay = getMaxExpenseDay(dayStats);
-
-  // Calculate comparison
-  const incomeChange = prevSummary && prevSummary.totalIncome > 0
-    ? ((currentSummary?.totalIncome || 0) - prevSummary.totalIncome) / prevSummary.totalIncome * 100
-    : null;
-  const expenseChange = prevSummary && prevSummary.totalExpense > 0
-    ? ((currentSummary?.totalExpense || 0) - prevSummary.totalExpense) / prevSummary.totalExpense * 100
-    : null;
-
-  const prevMonthName = getThaiMonthName(month === 1 ? 12 : month - 1);
+  const categoryStats = currentSummary ? getCategoryStats(currentSummary.transactions) : [];
 
   return (
     <div className="dashboard-page">
@@ -200,122 +266,128 @@ export function Dashboard() {
             </div>
           </div>
 
-          {/* Day Statistics */}
-          <section className="dashboard-section">
-            <h2 className="section-title">
-              <Award size={20} /> สถิติประจำเดือน
-            </h2>
-
-            <div className="highlight-cards">
-              {maxIncomeDay && maxIncomeDay.income > 0 && (
-                <div className="highlight-card income">
-                  <div className="highlight-label">
-                    <TrendingUp size={16} />
-                    วันที่รายรับสูงสุด
-                  </div>
-                  <div className="highlight-date">{formatThaiDate(maxIncomeDay.date)}</div>
-                  <div className="highlight-value">{formatMoney(maxIncomeDay.income)}</div>
-                </div>
-              )}
-
-              {maxExpenseDay && maxExpenseDay.expense > 0 && (
-                <div className="highlight-card expense">
-                  <div className="highlight-label">
-                    <TrendingDown size={16} />
-                    วันที่รายจ่ายสูงสุด
-                  </div>
-                  <div className="highlight-date">{formatThaiDate(maxExpenseDay.date)}</div>
-                  <div className="highlight-value">{formatMoney(maxExpenseDay.expense)}</div>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Comparison */}
-          {prevSummary && (
-            <section className="dashboard-section">
+          {/* Chart 1: Line Chart - Income vs Expense */}
+          {dayStats.length > 0 && (
+            <section className="dashboard-section chart-section">
               <h2 className="section-title">
-                <CalendarDays size={20} /> เปรียบเทียบกับ{prevMonthName}
+                <TrendingUp size={20} /> รายรับ vs รายจ่าย รายวัน
               </h2>
-
-              <div className="comparison-card">
-                <div className="comparison-row">
-                  <span className="comparison-label">รายรับ</span>
-                  <div className="comparison-values">
-                    <span className="comparison-prev">{formatMoney(prevSummary.totalIncome)}</span>
-                    <span className="comparison-arrow">→</span>
-                    <span className="comparison-current">{formatMoney(currentSummary.totalIncome)}</span>
-                  </div>
-                  {incomeChange !== null && (
-                    <div className={`comparison-change ${incomeChange >= 0 ? 'up' : 'down'}`}>
-                      {incomeChange >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                      {Math.abs(incomeChange).toFixed(0)}%
-                    </div>
-                  )}
-                </div>
-
-                <div className="comparison-divider"></div>
-
-                <div className="comparison-row">
-                  <span className="comparison-label">รายจ่าย</span>
-                  <div className="comparison-values">
-                    <span className="comparison-prev">{formatMoney(prevSummary.totalExpense)}</span>
-                    <span className="comparison-arrow">→</span>
-                    <span className="comparison-current">{formatMoney(currentSummary.totalExpense)}</span>
-                  </div>
-                  {expenseChange !== null && (
-                    <div className={`comparison-change ${expenseChange <= 0 ? 'up' : 'down'}`}>
-                      {expenseChange <= 0 ? <ArrowDownRight size={14} /> : <ArrowUpRight size={14} />}
-                      {Math.abs(expenseChange).toFixed(0)}%
-                    </div>
-                  )}
-                </div>
-
-                <div className="comparison-divider"></div>
-
-                <div className="comparison-row net">
-                  <span className="comparison-label">กำไร/ขาดทุน</span>
-                  <div className="comparison-values">
-                    <span className={`comparison-prev ${prevSummary.net >= 0 ? 'positive' : 'negative'}`}>
-                      {formatMoney(prevSummary.net)}
-                    </span>
-                    <span className="comparison-arrow">→</span>
-                    <span className={`comparison-current ${currentSummary.net >= 0 ? 'positive' : 'negative'}`}>
-                      {formatMoney(currentSummary.net)}
-                    </span>
-                  </div>
-                </div>
+              <div className="chart-container">
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={dayStats} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                    <XAxis
+                      dataKey="dayNum"
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={(value) => `${value}`}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="income"
+                      stroke={COLORS.income}
+                      strokeWidth={3}
+                      dot={{ fill: COLORS.income, strokeWidth: 2 }}
+                      name="รายรับ"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="expense"
+                      stroke={COLORS.expense}
+                      strokeWidth={3}
+                      dot={{ fill: COLORS.expense, strokeWidth: 2 }}
+                      name="รายจ่าย"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </section>
           )}
 
-          {/* Simple Bar Chart */}
+          {/* Chart 2: Bar Chart - Daily Net Profit */}
           {dayStats.length > 0 && (
-            <section className="dashboard-section">
+            <section className="dashboard-section chart-section">
               <h2 className="section-title">
-                <TrendingUp size={20} /> รายรับ 7 วันล่าสุด
+                <Wallet size={20} /> กำไร/ขาดทุน รายวัน
               </h2>
+              <div className="chart-container">
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={dayStats} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                    <XAxis
+                      dataKey="dayNum"
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={(value) => `${value}`}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="net" name="กำไร/ขาดทุน" radius={[4, 4, 0, 0]}>
+                      {dayStats.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.net >= 0 ? COLORS.income : COLORS.expense}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </section>
+          )}
 
-              <div className="bar-chart">
-                {dayStats.slice(0, 7).reverse().map((day) => {
-                  const maxIncome = Math.max(...dayStats.slice(0, 7).map(d => d.income));
-                  const percentage = maxIncome > 0 ? (day.income / maxIncome) * 100 : 0;
-                  const dateObj = new Date(day.date + 'T00:00:00');
-                  const dayNum = dateObj.getDate();
-
-                  return (
-                    <div key={day.date} className="bar-row">
-                      <span className="bar-date">{dayNum}</span>
-                      <div className="bar-track">
-                        <div
-                          className="bar-fill income"
-                          style={{ width: `${percentage}%` }}
-                        ></div>
+          {/* Chart 3: Donut Chart - Expense by Category */}
+          {categoryStats.length > 0 && (
+            <section className="dashboard-section chart-section">
+              <h2 className="section-title">
+                <PieChartIcon size={20} /> รายจ่ายแยกตามประเภท
+              </h2>
+              <div className="chart-container pie-chart-container">
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie
+                      data={categoryStats}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={80}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {categoryStats.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS.categories[entry.category]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<PieTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="pie-legend">
+                  {categoryStats.map((entry) => {
+                    const total = categoryStats.reduce((sum, e) => sum + e.value, 0);
+                    const percent = total > 0 ? ((entry.value / total) * 100).toFixed(0) : 0;
+                    return (
+                      <div key={entry.category} className="pie-legend-item">
+                        <span
+                          className="pie-legend-color"
+                          style={{ background: COLORS.categories[entry.category] }}
+                        />
+                        <span className="pie-legend-label">{entry.name}</span>
+                        <span className="pie-legend-percent">{percent}%</span>
+                        <span className="pie-legend-value">{formatMoney(entry.value)}</span>
                       </div>
-                      <span className="bar-value">{formatMoney(day.income)}</span>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </section>
           )}

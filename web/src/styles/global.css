@@ -43,6 +43,9 @@
   --radius-md: 1rem;
   --radius-lg: 1.5rem;
   --radius-full: 9999px;
+
+  /* Sidebar width for desktop */
+  --sidebar-width: 220px;
 }
 
 * {
@@ -68,6 +71,13 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* Desktop: มี sidebar ด้านซ้าย */
+@media (min-width: 768px) {
+  #root {
+    flex-direction: row;
+  }
 }
 
 /* ปุ่มกดใหญ่ สำหรับผู้สูงอายุ */
@@ -172,13 +182,38 @@ label {
   box-shadow: 0 4px 6px var(--color-shadow);
 }
 
-/* Container */
+/* Container - Mobile */
 .container {
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
   padding: 0 min(4vw, 16px);
   overflow-x: hidden;
+}
+
+/* Container - Desktop */
+@media (min-width: 768px) {
+  .container {
+    flex: 1;
+    max-width: 1200px;
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin-left: var(--sidebar-width);
+  }
+}
+
+/* Container - Large Desktop */
+@media (min-width: 1600px) {
+  .container {
+    max-width: 1500px;
+  }
+}
+
+/* Container - Full HD+ */
+@media (min-width: 1920px) {
+  .container {
+    max-width: none;
+    padding: var(--spacing-md) var(--spacing-xl);
+  }
 }
 
 /* Page header */
@@ -275,8 +310,13 @@ label {
   color: var(--color-text-light);
 }
 
+@media (min-width: 768px) {
+  .loading-screen {
+    margin-left: var(--sidebar-width);
+  }
+}
+
 .loading-screen .spinner-icon {
   animation: spin 1s linear infinite;
   color: var(--color-primary);
 }
-

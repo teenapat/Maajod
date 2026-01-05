@@ -31,6 +31,12 @@
   color: var(--color-text-light);
 }
 
+@media (min-width: 768px) {
+  .history-loading {
+    margin-left: var(--sidebar-width);
+  }
+}
+
 .history-empty {
   display: flex;
   flex-direction: column;
@@ -85,6 +91,7 @@
   font-weight: 700;
   color: var(--color-primary-dark);
   margin-bottom: var(--spacing-sm);
+  padding-right: 28px; /* เว้นที่ให้ indicator */
 }
 
 .timeline-summary {
@@ -264,4 +271,49 @@
   }
 }
 
+/* ===== Desktop Layout ===== */
+@media (min-width: 768px) {
+  .history-page {
+    padding-bottom: var(--spacing-lg);
+  }
 
+  .history-header {
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) 0;
+  }
+
+  .history-header-icon {
+    margin-bottom: 0;
+  }
+
+  /* Timeline grid - auto fill columns */
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+  }
+}
+
+@media (min-width: 1400px) {
+  .timeline {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ===== Extra Large Desktop (1600px+) ===== */
+@media (min-width: 1600px) {
+  .timeline {
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--spacing-lg);
+  }
+}
+
+/* ===== Full HD+ (1920px+) ===== */
+@media (min-width: 1920px) {
+  .timeline {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}

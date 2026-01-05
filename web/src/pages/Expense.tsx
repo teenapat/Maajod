@@ -96,8 +96,10 @@ export function Expense() {
         <div className="form-header-icon">
           <TrendingDown size={32} />
         </div>
-        <h1 className="form-title">เพิ่มรายจ่าย</h1>
-        <p className="form-subtitle">{currentStore.name}</p>
+        <div className="form-header-info">
+          <h1 className="form-title">เพิ่มรายจ่าย</h1>
+          <p className="form-subtitle">{currentStore.name}</p>
+        </div>
       </header>
 
       <form onSubmit={handleSubmit} className="form-card">

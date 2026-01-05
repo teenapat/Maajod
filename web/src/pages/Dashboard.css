@@ -31,6 +31,12 @@
   color: var(--color-text-light);
 }
 
+@media (min-width: 768px) {
+  .dashboard-loading {
+    margin-left: var(--sidebar-width);
+  }
+}
+
 .dashboard-content {
   display: flex;
   flex-direction: column;
@@ -333,6 +339,105 @@
   color: var(--color-text);
 }
 
+/* Chart Section */
+.chart-section {
+  grid-column: 1 / -1;
+}
+
+.chart-container {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: visible;
+}
+
+.chart-tooltip {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: var(--font-size-sm);
+}
+
+.chart-tooltip-label {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--color-text);
+}
+
+/* Pie Chart */
+.pie-chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  overflow: visible;
+}
+
+.pie-chart-container .recharts-responsive-container,
+.pie-chart-container .recharts-wrapper,
+.pie-chart-container svg {
+  overflow: visible !important;
+}
+
+.pie-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  justify-content: center;
+}
+
+.pie-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  background: var(--color-bg);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+}
+
+.pie-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pie-legend-label {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.pie-legend-percent {
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+}
+
+.pie-legend-value {
+  color: var(--color-text-light);
+  font-weight: 600;
+}
+
+/* Recharts overrides */
+.recharts-legend-wrapper {
+  padding-top: var(--spacing-md) !important;
+}
+
+.recharts-default-legend {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+.recharts-legend-item {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+}
+
 /* Bar Chart */
 .bar-chart {
   background: white;
@@ -384,3 +489,275 @@
   text-align: right;
 }
 
+/* ===== Desktop Layout ===== */
+@media (min-width: 768px) {
+  .dashboard-page {
+    padding-bottom: var(--spacing-lg);
+  }
+
+  .dashboard-header {
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) 0;
+  }
+
+  .dashboard-header-icon {
+    margin-bottom: 0;
+  }
+
+  /* Grid layout สำหรับ desktop */
+  .dashboard-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+
+  /* Stats cards แนวนอน */
+  .stats-grid {
+    grid-column: 1 / -1;
+    gap: var(--spacing-md);
+  }
+
+  .stat-card {
+    flex-direction: row;
+    text-align: left;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+  }
+
+  .stat-icon {
+    margin-bottom: 0;
+  }
+
+  /* Net card เต็มแถว */
+  .net-card {
+    grid-column: 1 / -1;
+    padding: var(--spacing-xl);
+  }
+
+  .net-value {
+    font-size: 2.5rem;
+  }
+
+  /* Highlight cards แนวนอน */
+  .highlight-cards {
+    flex-direction: row;
+  }
+
+  .highlight-card {
+    flex: 1;
+    padding: var(--spacing-lg);
+  }
+
+  /* Comparison row แนวนอน */
+  .comparison-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .comparison-card {
+    padding: var(--spacing-lg);
+  }
+
+  /* Bar chart */
+  .bar-chart {
+    padding: var(--spacing-lg);
+  }
+
+  .bar-track {
+    height: 28px;
+  }
+
+  /* Chart containers */
+  .chart-container {
+    padding: var(--spacing-lg);
+  }
+
+  .chart-section {
+    grid-column: span 1;
+  }
+
+  /* Pie chart - keep column on tablet */
+  .pie-chart-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pie-legend-item {
+    padding: 8px 16px;
+  }
+}
+
+/* Pie chart แนวนอน - only on larger desktop */
+@media (min-width: 1200px) {
+  .pie-chart-container {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-lg);
+  }
+
+  .pie-chart-container > .recharts-responsive-container {
+    flex: 0 0 250px;
+    min-width: 250px;
+  }
+
+  .pie-legend {
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+  }
+}
+
+/* ===== Large Desktop (1200px+) ===== */
+@media (min-width: 1200px) {
+  .dashboard-content {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Stats + Net ในแถวเดียว */
+  .stats-grid {
+    grid-column: span 2;
+  }
+
+  .net-card {
+    grid-column: span 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* Section titles */
+  .dashboard-section .section-title {
+    font-size: var(--font-size-lg);
+  }
+
+  /* Charts span 2 columns */
+  .chart-section {
+    grid-column: span 2;
+  }
+
+  /* Pie chart แต่ละตัวใช้ 1 column */
+  .chart-section:has(.pie-chart-container) {
+    grid-column: span 1;
+  }
+
+  /* Each section takes 1 column */
+  .dashboard-section {
+    grid-column: span 1;
+  }
+}
+
+/* ===== Extra Large Desktop (1600px+) ===== */
+@media (min-width: 1600px) {
+  .dashboard-content {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-xl);
+  }
+
+  .stats-grid {
+    grid-column: span 2;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .net-card {
+    grid-column: span 2;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    padding: var(--spacing-xl);
+  }
+
+  .net-card .net-header {
+    margin-bottom: 0;
+  }
+
+  .net-card .net-value {
+    font-size: 3rem;
+    margin-bottom: 0;
+  }
+
+  .net-card .net-status {
+    font-size: var(--font-size-lg);
+  }
+
+  .stat-card {
+    padding: var(--spacing-xl);
+  }
+
+  .stat-icon {
+    width: 72px;
+    height: 72px;
+  }
+
+  .stat-value {
+    font-size: var(--font-size-xl);
+  }
+
+  .highlight-card {
+    padding: var(--spacing-xl);
+  }
+
+  .highlight-value {
+    font-size: var(--font-size-xl);
+  }
+
+  /* Charts layout */
+  .chart-section {
+    grid-column: span 2;
+  }
+
+  .chart-container {
+    padding: var(--spacing-xl);
+  }
+
+  /* Pie chart - smaller column */
+  .chart-section:has(.pie-chart-container) {
+    grid-column: span 2;
+  }
+
+  .pie-chart-container > .recharts-responsive-container {
+    max-width: 350px;
+  }
+
+  .pie-legend-item {
+    padding: 10px 16px;
+    font-size: var(--font-size-md);
+  }
+
+  /* Regular dashboard sections */
+  .dashboard-section:not(.chart-section) {
+    grid-column: span 1;
+  }
+}
+
+/* ===== Full HD+ (1920px+) ===== */
+@media (min-width: 1920px) {
+  .dashboard-content {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .stats-grid {
+    grid-column: span 2;
+  }
+
+  .net-card {
+    grid-column: span 2;
+  }
+
+  /* Charts layout */
+  .chart-section {
+    grid-column: span 2;
+  }
+
+  .bar-track {
+    height: 32px;
+  }
+
+  .bar-value {
+    font-size: var(--font-size-md);
+    min-width: 90px;
+  }
+}

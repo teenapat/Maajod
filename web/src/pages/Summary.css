@@ -61,6 +61,12 @@
   color: var(--color-text-light);
 }
 
+@media (min-width: 768px) {
+  .summary-loading {
+    margin-left: var(--sidebar-width);
+  }
+}
+
 .spinner-icon {
   animation: spin 1s linear infinite;
   color: var(--color-primary);
@@ -90,4 +96,30 @@
   height: 24px;
   background: var(--color-primary);
   border-radius: 2px;
+}
+
+/* ===== Desktop Layout ===== */
+@media (min-width: 768px) {
+  .summary-page {
+    padding-bottom: var(--spacing-lg);
+  }
+
+  .summary-header {
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) 0;
+  }
+
+  .summary-content {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: var(--spacing-lg);
+    align-items: start;
+  }
+
+  .summary-transactions {
+    margin-top: 0;
+  }
 }

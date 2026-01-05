@@ -1,3 +1,4 @@
+/* ===== Mobile: Bottom Navigation ===== */
 .navbar {
   position: fixed;
   bottom: 0;
@@ -24,7 +25,6 @@
   transition: all 0.2s ease;
   flex: 1;
   min-width: 0;
-  /* Allow shrinking */
 }
 
 .nav-item:active {
@@ -75,4 +75,87 @@
 
 .nav-item.logout:hover {
   color: var(--color-expense);
+}
+
+/* App title - hidden on mobile */
+.nav-app-title {
+  display: none;
+}
+
+/* ===== Desktop: Sidebar ===== */
+@media (min-width: 768px) {
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: auto;
+    width: var(--sidebar-width);
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: var(--spacing-md) var(--spacing-sm);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+    gap: var(--spacing-xs);
+  }
+
+  .nav-app-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--color-bg);
+    padding-bottom: var(--spacing-md);
+  }
+
+  .nav-app-logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+    color: white;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-app-name {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-primary-dark);
+  }
+
+  .nav-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: var(--spacing-sm);
+    gap: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    flex: 0;
+  }
+
+  .nav-item:hover {
+    background: var(--color-bg);
+  }
+
+  .nav-item.active {
+    background: rgba(45, 90, 39, 0.1);
+  }
+
+  .nav-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .nav-label {
+    font-size: var(--font-size-sm);
+    margin-top: 0;
+  }
+
+  .nav-item.logout {
+    margin-top: auto;
+    padding: var(--spacing-sm);
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--spacing-md);
+  }
 }
