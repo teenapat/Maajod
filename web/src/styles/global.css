@@ -61,6 +61,7 @@ body {
   color: var(--color-text);
   min-height: 100vh;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 #root {
@@ -167,15 +168,17 @@ label {
 .card {
   background: var(--color-bg-card);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-md);
+  padding: min(4vw, 24px);
   box-shadow: 0 4px 6px var(--color-shadow);
 }
 
 /* Container */
 .container {
-  max-width: 480px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
-  padding: var(--spacing-sm);
+  padding: 0 min(4vw, 16px);
+  overflow-x: hidden;
 }
 
 /* Page header */

@@ -35,9 +35,9 @@
 }
 
 .btn-size-lg {
-  font-size: var(--font-size-lg);
-  padding: var(--spacing-md) var(--spacing-lg);
-  min-height: 72px;
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
+  padding: min(4vw, 24px) min(5vw, 32px);
+  min-height: 64px;
 }
 
 /* Variants */

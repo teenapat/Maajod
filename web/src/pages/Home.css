@@ -43,18 +43,29 @@
   font-size: var(--font-size-xxl);
   font-weight: 700;
   color: var(--color-primary-dark);
+  margin-bottom: 4px;
+}
+
+.home-greeting {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-md);
+  color: var(--color-primary);
+  font-weight: 600;
   margin-bottom: var(--spacing-xs);
 }
 
 .home-date {
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-sm);
   color: var(--color-text-light);
+  margin-top: var(--spacing-xs);
 }
 
 .home-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-sm);
+  gap: min(3vw, 16px);
   margin-top: var(--spacing-md);
 }
 

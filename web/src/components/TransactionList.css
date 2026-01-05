@@ -7,8 +7,8 @@
 .transaction-item {
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm);
+  gap: min(3vw, 16px);
+  padding: min(3vw, 16px);
   background: white;
   border-radius: var(--radius-md);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);

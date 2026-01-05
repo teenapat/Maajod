@@ -1,4 +1,4 @@
-import { Loader2, Receipt, TrendingDown, TrendingUp } from 'lucide-react';
+import { Hand, Loader2, Receipt, Sparkles, TrendingDown, TrendingUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/Button';
@@ -12,7 +12,7 @@ import { formatThaiDate, getToday } from '../utils/date';
 import './Home.css';
 
 export function Home() {
-  const { currentStore } = useAuth();
+  const { user, currentStore } = useAuth();
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -83,6 +83,13 @@ export function Home() {
           <Receipt size={40} />
         </div>
         <h1 className="home-title">แม่จด</h1>
+        {user && (
+          <p className="home-greeting">
+            <Hand size={18} />
+            สวัสดี, {user.name}
+            <Sparkles size={16} />
+          </p>
+        )}
         <StoreSelector onStoreChange={fetchData} />
         <p className="home-date">{formatThaiDate(getToday())}</p>
       </header>
