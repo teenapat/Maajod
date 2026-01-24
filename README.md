@@ -16,7 +16,8 @@ Designed for elderly users with large buttons and easy-to-read text.
 
 ### Prerequisites
 - Node.js 18+
-- MongoDB Atlas account (free tier)
+- SQL Server (Express edition or higher)
+- MongoDB (for data migration only, if migrating from existing MongoDB database)
 
 ### 1. Clone & Install
 
@@ -36,22 +37,43 @@ Create `api/.env`:
 
 ```env
 PORT=3001
-MONGODB_URI=mongodb+srv://YOUR_USER:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/maajod?retryWrites=true&w=majority
+# SQL Server Connection
+DB_HOST=localhost\SQLEXPRESS
+DB_PORT=1433
+DB_USER=your_username
+DB_PASS=your_password
+DB_NAME=maajod
+
+# JWT Secret
 JWT_SECRET=your-secret-key
+
+# MongoDB (only needed for migration from MongoDB)
+MONGODB_URI=mongodb://localhost:27017/maajod
 ```
 
-### 3. Run Migration (First time only)
+### 3. Database Setup
+
+#### Option A: Fresh Start (New Database)
+The database tables will be created automatically when you start the API server (TypeORM synchronize).
+
+#### Option B: Migrate from MongoDB (if you have existing data)
 
 ```bash
 cd api
-npx ts-node src/scripts/migrate-to-multi-store.ts
+npm run migrate:mongo-to-sql
 ```
 
 This will:
-- Create store "ผักกาดตามสั่ง" (ร้านแม่)
-- Create store "อาหมวยซูชิ" (ร้านพี่สาว)
-- Assign users Chris and mae to ผักกาดตามสั่ง
-- Migrate all existing transactions to ผักกาดตามสั่ง
+- Connect to MongoDB and read all data
+- Create tables in SQL Server (if not exist)
+- Migrate Users, Stores, UserStores, and Transactions
+- Generate new UUIDs for all records
+- Preserve Thai characters in names, descriptions, and notes
+
+**Note:** Make sure to:
+- Stop the API server before running migration
+- Close any SQL Server Management Studio connections
+- Have both MongoDB and SQL Server running
 
 ### 4. Run Development
 
@@ -94,7 +116,7 @@ npm run dev
 
 ### Transactions (requires auth + store)
 
-> **Note**: All transaction endpoints require `X-Store-Id` header or `storeId` query param
+> **Note**: All transaction endpoints require `x-store-id` header or `storeId` query param. If not provided, the API will use the user's default store automatically.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -109,7 +131,7 @@ npm run dev
 ```bash
 curl -X POST http://localhost:3001/api/transactions \
   -H "Authorization: Bearer YOUR_TOKEN" \
-  -H "X-Store-Id: STORE_ID" \
+  -H "x-store-id: STORE_ID" \
   -H "Content-Type: application/json" \
   -d '{"type":"income","amount":1000,"note":"ขายข้าว"}'
 ```
@@ -145,7 +167,8 @@ User ←→ UserStore ←→ Store
 
 - **Frontend:** React + TypeScript + Vite
 - **Backend:** Node.js + Express + TypeScript
-- **Database:** MongoDB Atlas
+- **Database:** SQL Server (Microsoft SQL Server)
+- **ORM:** TypeORM
 - **Icons:** Lucide React
 
 ---
