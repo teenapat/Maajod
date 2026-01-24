@@ -1,5 +1,5 @@
 import { ChevronDown, Store } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import './StoreSelector.css';
 
@@ -58,9 +58,9 @@ export function StoreSelector({ onStoreChange }: StoreSelectorProps) {
         <div className="store-dropdown">
           {stores.map((store) => (
             <button
-              key={store._id}
-              className={`store-option ${store._id === currentStore?._id ? 'active' : ''}`}
-              onClick={() => handleSelect(store._id)}
+              key={store.id}
+              className={`store-option ${store.id === currentStore?.id ? 'active' : ''}`}
+              onClick={() => handleSelect(store.id)}
             >
               <span className="store-option-name">{store.name}</span>
               {store.isDefault && <span className="store-badge">Default</span>}

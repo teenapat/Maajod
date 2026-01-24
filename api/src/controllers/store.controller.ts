@@ -69,7 +69,7 @@ export class StoreController {
         return;
       }
 
-      res.json({ ...store.toObject(), userRole: access.role });
+      res.json({ ...store, userRole: access.role });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       res.status(400).json({ error: message });

@@ -10,7 +10,7 @@ import {
   TrendingUp,
   Wallet
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Bar,
   BarChart,
@@ -29,8 +29,8 @@ import {
 import { Button } from '../components/Button';
 import { StoreSelector } from '../components/StoreSelector';
 import { useAuth } from '../contexts/AuthContext';
-import { api } from '../services/api';
-import { CATEGORY_LABELS, ExpenseCategory, Summary, Transaction } from '../types/transaction';
+import { useMonthlySummary } from '../hooks/useMonthlySummary';
+import { CATEGORY_LABELS, ExpenseCategory, Transaction } from '../types/transaction';
 import { formatMoney, getThaiMonthName } from '../utils/date';
 import './Dashboard.css';
 
@@ -144,37 +144,17 @@ const PieTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ n
 
 export function Dashboard() {
   const { currentStore } = useAuth();
-  const [currentSummary, setCurrentSummary] = useState<Summary | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
 
-  const fetchData = async () => {
-    if (!currentStore) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError('');
-
-      // Fetch current month
-      const current = await api.getMonthlySummary(year, month);
-      setCurrentSummary(current);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [year, month, currentStore?._id]);
+  // ใช้ custom hook ที่มี cache
+  const { data: currentSummary, loading, error } = useMonthlySummary(
+    currentStore?.id || null,
+    year,
+    month
+  );
 
   const handlePrevMonth = () => {
     if (month === 1) {
@@ -202,7 +182,7 @@ export function Dashboard() {
       <header className="dashboard-header">
         <LayoutDashboard size={32} className="dashboard-header-icon" />
         <h1 className="dashboard-page-title">ภาพรวมร้าน</h1>
-        <StoreSelector onStoreChange={fetchData} />
+        <StoreSelector onStoreChange={() => {}} />
       </header>
 
       <div className="month-selector">

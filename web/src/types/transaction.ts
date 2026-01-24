@@ -2,7 +2,7 @@ export type TransactionType = 'income' | 'expense';
 export type ExpenseCategory = 'ingredients' | 'supplies' | 'utilities' | 'other';
 
 export interface Transaction {
-  _id: string;
+  id: string;
   type: TransactionType;
   amount: number;
   category?: ExpenseCategory;

@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { clearMonthlySummaryCache } from '../hooks/useMonthlySummary';
 import { API_BASE } from '../services/api';
 import { Store } from '../types/store';
 
@@ -58,20 +59,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         // หา current store จาก savedCurrentStoreId หรือใช้ default
         if (savedCurrentStoreId) {
-          const found = parsedStores.find(s => s._id === savedCurrentStoreId);
+          const found = parsedStores.find(s => s.id === savedCurrentStoreId);
           if (found) {
             setCurrentStore(found);
           } else if (parsedStores.length > 0) {
             // ถ้าไม่เจอ ใช้ default หรือตัวแรก
             const defaultStore = parsedStores.find(s => s.isDefault) || parsedStores[0];
             setCurrentStore(defaultStore);
-            localStorage.setItem('currentStoreId', defaultStore._id);
+            localStorage.setItem('currentStoreId', defaultStore.id);
           }
         } else if (parsedStores.length > 0) {
           // ยังไม่เคยเลือกร้าน ใช้ default หรือตัวแรก
           const defaultStore = parsedStores.find(s => s.isDefault) || parsedStores[0];
           setCurrentStore(defaultStore);
-          localStorage.setItem('currentStoreId', defaultStore._id);
+          localStorage.setItem('currentStoreId', defaultStore.id);
         }
       }
     }
@@ -100,7 +101,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (data.stores && data.stores.length > 0) {
       const defaultStore = data.stores.find((s: Store) => s.isDefault) || data.stores[0];
       setCurrentStore(defaultStore);
-      localStorage.setItem('currentStoreId', defaultStore._id);
+      localStorage.setItem('currentStoreId', defaultStore.id);
     }
 
     localStorage.setItem('token', data.token);
@@ -120,8 +121,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const switchStore = (storeId: string) => {
-    const store = stores.find(s => s._id === storeId);
+    const store = stores.find(s => s.id === storeId);
     if (store) {
+      // Clear cache ของ store เก่าก่อนเปลี่ยน
+      if (currentStore?.id) {
+        clearMonthlySummaryCache(currentStore.id);
+      }
       setCurrentStore(store);
       localStorage.setItem('currentStoreId', storeId);
     }

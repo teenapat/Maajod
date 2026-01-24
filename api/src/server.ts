@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -8,7 +9,7 @@ const PORT = process.env.PORT || 3001;
 
 async function startServer() {
   try {
-    // Connect to MongoDB
+    // Connect to SQL Server
     await connectDatabase();
 
     // Start server

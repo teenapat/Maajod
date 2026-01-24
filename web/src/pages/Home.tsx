@@ -6,6 +6,7 @@ import { SummaryCard } from '../components/SummaryCard';
 import { TransactionList } from '../components/TransactionList';
 import { StoreSelector } from '../components/StoreSelector';
 import { useAuth } from '../contexts/AuthContext';
+import { clearMonthlySummaryCache } from '../hooks/useMonthlySummary';
 import { api } from '../services/api';
 import { Summary } from '../types/transaction';
 import { formatThaiDate, getToday } from '../utils/date';
@@ -37,7 +38,7 @@ export function Home() {
 
   useEffect(() => {
     fetchData();
-  }, [currentStore?._id]);
+  }, [currentStore?.id]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('ต้องการลบรายการนี้?')) return;
@@ -45,6 +46,10 @@ export function Home() {
     try {
       await api.deleteTransaction(id);
       fetchData();
+      // Clear monthly cache เพื่อให้หน้า Dashboard, History, Summary โหลดข้อมูลใหม่
+      if (currentStore?.id) {
+        clearMonthlySummaryCache(currentStore.id);
+      }
     } catch (err) {
       alert(err instanceof Error ? err.message : 'ลบไม่สำเร็จ');
     }
