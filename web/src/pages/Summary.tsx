@@ -12,16 +12,18 @@ import './Summary.css';
 
 export function Summary() {
   const { currentStore } = useAuth();
+  const [refreshKey, setRefreshKey] = useState(0); // สำหรับ trigger re-fetch
 
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
 
-  // ใช้ custom hook ที่มี cache
-  const { data: summary, loading, error, invalidateCache } = useMonthlySummary(
+  // ใช้ custom hook (ไม่มี cache - ดึงข้อมูลใหม่ทุกครั้ง)
+  const { data: summary, loading, error } = useMonthlySummary(
     currentStore?.id || null,
     year,
-    month
+    month,
+    refreshKey
   );
 
   const handlePrevMonth = () => {
@@ -47,8 +49,8 @@ export function Summary() {
 
     try {
       await api.deleteTransaction(id);
-      // Invalidate cache เพื่อให้โหลดข้อมูลใหม่
-      invalidateCache();
+      // Trigger re-fetch โดยเปลี่ยน refreshKey
+      setRefreshKey(prev => prev + 1);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'ลบไม่สำเร็จ');
     }

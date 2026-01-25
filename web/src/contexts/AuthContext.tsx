@@ -1,5 +1,4 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { clearMonthlySummaryCache } from '../hooks/useMonthlySummary';
 import { API_BASE } from '../services/api';
 import { Store } from '../types/store';
 
@@ -123,12 +122,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const switchStore = (storeId: string) => {
     const store = stores.find(s => s.id === storeId);
     if (store) {
-      // Clear cache ของ store เก่าก่อนเปลี่ยน
-      if (currentStore?.id) {
-        clearMonthlySummaryCache(currentStore.id);
-      }
       setCurrentStore(store);
       localStorage.setItem('currentStoreId', storeId);
+      // Hook ในหน้าอื่นๆ จะดึงข้อมูลใหม่อัตโนมัติเมื่อ store เปลี่ยน (ไม่มี cache)
     }
   };
 

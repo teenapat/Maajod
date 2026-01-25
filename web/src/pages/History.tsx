@@ -48,16 +48,19 @@ function groupTransactionsByDate(transactions: Transaction[]): DailySummary[] {
 export function History() {
   const { currentStore } = useAuth();
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0); // สำหรับ trigger re-fetch
 
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
 
-  // ใช้ custom hook ที่มี cache
-  const { data: summary, loading, error, invalidateCache } = useMonthlySummary(
+  // ใช้ custom hook (ไม่มี cache - ดึงข้อมูลใหม่ทุกครั้ง)
+  // เพิ่ม refreshKey ใน dependencies เพื่อ trigger re-fetch
+  const { data: summary, loading, error } = useMonthlySummary(
     currentStore?.id || null,
     year,
-    month
+    month,
+    refreshKey
   );
 
   const dailySummaries = summary ? groupTransactionsByDate(summary.transactions) : [];
@@ -89,15 +92,15 @@ export function History() {
 
     try {
       await api.deleteTransaction(id);
-      // Invalidate cache เพื่อให้โหลดข้อมูลใหม่
-      invalidateCache();
+      // Trigger re-fetch โดยเปลี่ยน refreshKey
+      setRefreshKey(prev => prev + 1);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'ลบไม่สำเร็จ');
     }
   };
 
   const handleStoreChange = () => {
-    // เมื่อเปลี่ยน store cache จะถูก clear อัตโนมัติผ่าน hook
+    // Hook จะดึงข้อมูลใหม่อัตโนมัติเมื่อ store เปลี่ยน
   };
 
   return (

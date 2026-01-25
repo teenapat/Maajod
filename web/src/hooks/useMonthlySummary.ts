@@ -2,26 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from '../services/api';
 import { Summary } from '../types/transaction';
 
-interface CacheEntry {
-  data: Summary;
-  timestamp: number;
-}
-
-// Cache เก็บข้อมูลไว้ 5 นาที
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-// Global cache สำหรับแชร์ระหว่าง components
-const cache = new Map<string, CacheEntry>();
-
-function getCacheKey(storeId: string, year: number, month: number): string {
-  return `${storeId}-${year}-${month}`;
-}
-
-function isCacheValid(entry: CacheEntry): boolean {
-  return Date.now() - entry.timestamp < CACHE_DURATION;
-}
-
-export function useMonthlySummary(storeId: string | null, year: number, month: number) {
+export function useMonthlySummary(storeId: string | null, year: number, month: number, refreshKey?: number) {
   const [data, setData] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -40,18 +21,7 @@ export function useMonthlySummary(storeId: string | null, year: number, month: n
       return;
     }
 
-    const cacheKey = getCacheKey(storeId, year, month);
-    const cached = cache.get(cacheKey);
-
-    // ตรวจสอบ cache ก่อน
-    if (cached && isCacheValid(cached)) {
-      setData(cached.data);
-      setLoading(false);
-      setError('');
-      return;
-    }
-
-    // ถ้า cache หมดอายุหรือไม่มี ให้เรียก API
+    // เรียก API ทุกครั้ง (ไม่มี cache) - เรียงตามเวลาล่าสุดก่อน
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
@@ -61,11 +31,18 @@ export function useMonthlySummary(storeId: string | null, year: number, month: n
     api.getMonthlySummary(year, month)
       .then((result) => {
         if (!controller.signal.aborted) {
-          // เก็บใน cache
-          cache.set(cacheKey, {
-            data: result,
-            timestamp: Date.now(),
-          });
+          // เรียง transactions ตามเวลาล่าสุดก่อน (date DESC, createdAt DESC)
+          if (result.transactions) {
+            result.transactions.sort((a, b) => {
+              const dateA = new Date(a.date).getTime();
+              const dateB = new Date(b.date).getTime();
+              if (dateB !== dateA) return dateB - dateA; // วันที่ใหม่ก่อน
+              // ถ้าวันที่เท่ากัน เรียงตาม createdAt
+              const createdA = new Date(a.createdAt || a.date).getTime();
+              const createdB = new Date(b.createdAt || b.date).getTime();
+              return createdB - createdA; // สร้างใหม่ก่อน
+            });
+          }
           setData(result);
           setLoading(false);
         }
@@ -80,32 +57,7 @@ export function useMonthlySummary(storeId: string | null, year: number, month: n
     return () => {
       controller.abort();
     };
-  }, [storeId, year, month]);
+  }, [storeId, year, month, refreshKey]); // เพิ่ม refreshKey ใน dependencies
 
-  // Function สำหรับ invalidate cache (ใช้เมื่อมีการเพิ่ม/ลบ transaction)
-  const invalidateCache = () => {
-    if (storeId) {
-      const cacheKey = getCacheKey(storeId, year, month);
-      cache.delete(cacheKey);
-    }
-  };
-
-  return { data, loading, error, invalidateCache };
-}
-
-// Function สำหรับ clear cache ทั้งหมด (ใช้เมื่อเปลี่ยน store)
-export function clearMonthlySummaryCache(storeId?: string) {
-  if (storeId) {
-    // Clear cache เฉพาะ store นี้
-    const keysToDelete: string[] = [];
-    cache.forEach((_, key) => {
-      if (key.startsWith(`${storeId}-`)) {
-        keysToDelete.push(key);
-      }
-    });
-    keysToDelete.forEach(key => cache.delete(key));
-  } else {
-    // Clear cache ทั้งหมด
-    cache.clear();
-  }
+  return { data, loading, error };
 }
