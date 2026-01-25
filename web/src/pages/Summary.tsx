@@ -1,46 +1,30 @@
 import { BarChart3, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../components/Button';
 import { SummaryCard } from '../components/SummaryCard';
 import { TransactionList } from '../components/TransactionList';
 import { StoreSelector } from '../components/StoreSelector';
 import { useAuth } from '../contexts/AuthContext';
+import { useMonthlySummary } from '../hooks/useMonthlySummary';
 import { api } from '../services/api';
-import { Summary as SummaryType } from '../types/transaction';
 import { getThaiMonthName } from '../utils/date';
 import './Summary.css';
 
 export function Summary() {
   const { currentStore } = useAuth();
-  const [summary, setSummary] = useState<SummaryType | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0); // สำหรับ trigger re-fetch
 
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
 
-  const fetchData = async () => {
-    if (!currentStore) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError('');
-      const data = await api.getMonthlySummary(year, month);
-      setSummary(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [year, month, currentStore?._id]);
+  // ใช้ custom hook (ไม่มี cache - ดึงข้อมูลใหม่ทุกครั้ง)
+  const { data: summary, loading, error } = useMonthlySummary(
+    currentStore?.id || null,
+    year,
+    month,
+    refreshKey
+  );
 
   const handlePrevMonth = () => {
     if (month === 1) {
@@ -65,7 +49,8 @@ export function Summary() {
 
     try {
       await api.deleteTransaction(id);
-      fetchData();
+      // Trigger re-fetch โดยเปลี่ยน refreshKey
+      setRefreshKey(prev => prev + 1);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'ลบไม่สำเร็จ');
     }
@@ -76,7 +61,7 @@ export function Summary() {
       <header className="summary-header">
         <BarChart3 size={32} className="summary-header-icon" />
         <h1 className="summary-page-title">สรุปรายเดือน</h1>
-        <StoreSelector onStoreChange={fetchData} />
+        <StoreSelector onStoreChange={() => {}} />
       </header>
 
       <div className="month-selector">

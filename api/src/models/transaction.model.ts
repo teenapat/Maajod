@@ -1,59 +1,40 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Store } from './store.model';
 
 export type TransactionType = 'income' | 'expense';
 export type ExpenseCategory = 'ingredients' | 'supplies' | 'utilities' | 'other';
 
-export interface ITransaction extends Document {
-  storeId: Types.ObjectId;
-  type: TransactionType;
-  amount: number;
+@Entity('transactions')
+@Index(['storeId', 'date'])
+export class Transaction {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  @Column('uuid')
+  storeId!: string;
+
+  @ManyToOne(() => Store)
+  @JoinColumn({ name: 'storeId' })
+  store?: Store;
+
+  @Column({ type: 'varchar', length: 20 })
+  type!: TransactionType;
+
+  @Column({ type: 'decimal', precision: 18, scale: 2 })
+  amount!: number;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
   category?: ExpenseCategory;
+
+  @Column({ type: 'ntext', nullable: true })
   note?: string;
-  date: Date;
-  createdAt: Date;
-  updatedAt: Date;
+
+  @Column({ type: 'datetime', default: () => 'GETDATE()' })
+  date!: Date;
+
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }
-
-const TransactionSchema = new Schema<ITransaction>(
-  {
-    storeId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Store',
-      required: true,
-      index: true,
-    },
-    type: {
-      type: String,
-      enum: ['income', 'expense'],
-      required: true,
-    },
-    amount: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    category: {
-      type: String,
-      enum: ['ingredients', 'supplies', 'utilities', 'other'],
-      required: function (this: ITransaction) {
-        return this.type === 'expense';
-      },
-    },
-    note: {
-      type: String,
-      default: '',
-    },
-    date: {
-      type: Date,
-      default: Date.now,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-
-// Compound index สำหรับ query by store และ date
-TransactionSchema.index({ storeId: 1, date: -1 });
-
-export const Transaction = mongoose.model<ITransaction>('Transaction', TransactionSchema);

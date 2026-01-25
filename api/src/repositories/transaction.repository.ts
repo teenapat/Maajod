@@ -1,5 +1,6 @@
-import { Transaction, ITransaction, TransactionType, ExpenseCategory } from '../models/transaction.model';
-import { Types } from 'mongoose';
+import { AppDataSource } from '../config/database';
+import { Transaction, TransactionType, ExpenseCategory } from '../models/transaction.model';
+import { Repository } from 'typeorm';
 
 export interface CreateTransactionInput {
   storeId: string;
@@ -11,54 +12,70 @@ export interface CreateTransactionInput {
 }
 
 export class TransactionRepository {
-  async create(data: CreateTransactionInput): Promise<ITransaction> {
-    const transaction = new Transaction({
-      ...data,
-      storeId: new Types.ObjectId(data.storeId),
+  private transactionRepository: Repository<Transaction>;
+
+  constructor() {
+    this.transactionRepository = AppDataSource.getRepository(Transaction);
+  }
+
+  async create(data: CreateTransactionInput): Promise<Transaction> {
+    const transaction = this.transactionRepository.create({
+      storeId: data.storeId,
+      type: data.type,
+      amount: data.amount,
+      category: data.category,
+      note: data.note,
+      date: data.date || new Date(),
     });
-    return transaction.save();
+    return await this.transactionRepository.save(transaction);
   }
 
-  async findByDateRange(storeId: string, startDate: Date, endDate: Date): Promise<ITransaction[]> {
-    return Transaction.find({
-      storeId: new Types.ObjectId(storeId),
-      date: {
-        $gte: startDate,
-        $lte: endDate,
-      },
-    }).sort({ date: -1, createdAt: -1 });
+  async findByDateRange(storeId: string, startDate: Date, endDate: Date): Promise<Transaction[]> {
+    return this.transactionRepository
+      .createQueryBuilder('transaction')
+      .where('transaction.storeId = :storeId', { storeId })
+      .andWhere('transaction.date >= :startDate', { startDate })
+      .andWhere('transaction.date <= :endDate', { endDate })
+      .orderBy('transaction.date', 'DESC')
+      .addOrderBy('transaction.createdAt', 'DESC')
+      .getMany();
   }
 
-  async findById(id: string): Promise<ITransaction | null> {
-    return Transaction.findById(id);
-  }
-
-  async delete(id: string, storeId: string): Promise<ITransaction | null> {
-    return Transaction.findOneAndDelete({
-      _id: new Types.ObjectId(id),
-      storeId: new Types.ObjectId(storeId),
+  async findById(id: string): Promise<Transaction | null> {
+    return this.transactionRepository.findOne({
+      where: { id },
     });
+  }
+
+  async delete(id: string, storeId: string): Promise<Transaction | null> {
+    const transaction = await this.transactionRepository.findOne({
+      where: { id, storeId },
+    });
+    if (!transaction) return null;
+
+    await this.transactionRepository.remove(transaction);
+    return transaction;
   }
 
   async aggregateByDateRange(
     storeId: string,
     startDate: Date,
     endDate: Date
-  ): Promise<{ _id: TransactionType; total: number }[]> {
-    return Transaction.aggregate([
-      {
-        $match: {
-          storeId: new Types.ObjectId(storeId),
-          date: { $gte: startDate, $lte: endDate },
-        },
-      },
-      {
-        $group: {
-          _id: '$type',
-          total: { $sum: '$amount' },
-        },
-      },
-    ]);
+  ): Promise<{ type: TransactionType; total: number }[]> {
+    const result = await this.transactionRepository
+      .createQueryBuilder('transaction')
+      .select('transaction.type', 'type')
+      .addSelect('SUM(transaction.amount)', 'total')
+      .where('transaction.storeId = :storeId', { storeId })
+      .andWhere('transaction.date >= :startDate', { startDate })
+      .andWhere('transaction.date <= :endDate', { endDate })
+      .groupBy('transaction.type')
+      .getRawMany();
+
+    return result.map((item) => ({
+      type: item.type as TransactionType,
+      total: parseFloat(item.total) || 0,
+    }));
   }
 }
 

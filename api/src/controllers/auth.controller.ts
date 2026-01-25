@@ -1,9 +1,17 @@
 import { Request, Response } from 'express';
+import { Repository } from 'typeorm';
+import { AppDataSource } from '../config/database';
+import { AuthRequest, generateToken } from '../middleware/auth.middleware';
 import { User } from '../models/user.model';
-import { generateToken, AuthRequest } from '../middleware/auth.middleware';
 import { storeService } from '../services/store.service';
 
 export class AuthController {
+  private userRepository: Repository<User>;
+
+  constructor() {
+    this.userRepository = AppDataSource.getRepository(User);
+  }
+
   // POST /api/auth/login
   async login(req: Request, res: Response): Promise<void> {
     try {
@@ -14,7 +22,9 @@ export class AuthController {
         return;
       }
 
-      const user = await User.findOne({ username: username.toLowerCase() });
+      const user = await this.userRepository.findOne({
+        where: { username: username.toLowerCase() },
+      });
 
       if (!user) {
         res.status(401).json({ error: 'username หรือ password ไม่ถูกต้อง' });
@@ -29,10 +39,14 @@ export class AuthController {
       }
 
       // ดึงร้านทั้งหมดของ user
-      const stores = await storeService.getStoresByUserId(user._id.toString());
+      const stores = await storeService.getStoresByUserId(user.id);
+      
+      // หา default store หรือใช้ store แรก
+      const defaultStore = stores.find(s => s.isDefault) || stores[0];
+      const defaultStoreId = defaultStore?.id || null;
 
       const token = generateToken({
-        id: user._id.toString(),
+        id: user.id,
         username: user.username,
         name: user.name,
         role: user.role,
@@ -41,12 +55,13 @@ export class AuthController {
       res.json({
         token,
         user: {
-          id: user._id,
+          id: user.id,
           username: user.username,
           name: user.name,
           role: user.role,
         },
         stores,
+        defaultStoreId, // เพิ่ม defaultStoreId เพื่อให้ frontend ใช้
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -65,28 +80,30 @@ export class AuthController {
       }
 
       // เช็คว่า username ซ้ำไหม
-      const existingUser = await User.findOne({ username: username.toLowerCase() });
+      const existingUser = await this.userRepository.findOne({
+        where: { username: username.toLowerCase() },
+      });
       if (existingUser) {
         res.status(400).json({ error: 'username นี้ถูกใช้แล้ว' });
         return;
       }
 
-      const user = new User({
+      const user = this.userRepository.create({
         username: username.toLowerCase(),
         password,
         name,
         role: role || 'user',
       });
 
-      await user.save();
+      const savedUser = await this.userRepository.save(user);
 
       res.status(201).json({
         message: 'สร้างผู้ใช้สำเร็จ',
         user: {
-          id: user._id,
-          username: user.username,
-          name: user.name,
-          role: user.role,
+          id: savedUser.id,
+          username: savedUser.username,
+          name: savedUser.name,
+          role: savedUser.role,
         },
       });
     } catch (error) {
@@ -105,10 +122,15 @@ export class AuthController {
 
       // ดึงร้านทั้งหมดของ user
       const stores = await storeService.getStoresByUserId(req.user.id);
+      
+      // หา default store หรือใช้ store แรก
+      const defaultStore = stores.find(s => s.isDefault) || stores[0];
+      const defaultStoreId = defaultStore?.id || null;
 
       res.json({
         user: req.user,
         stores,
+        defaultStoreId, // เพิ่ม defaultStoreId เพื่อให้ frontend ใช้
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';

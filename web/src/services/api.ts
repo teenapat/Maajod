@@ -14,7 +14,7 @@ function getAuthHeaders(): HeadersInit {
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(storeId ? { 'X-Store-Id': storeId } : {}),
+    ...(storeId && storeId !== 'undefined' ? { 'x-store-id': storeId } : {}),
   };
 }
 

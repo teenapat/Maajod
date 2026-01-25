@@ -1,7 +1,7 @@
 export type StoreRole = 'owner' | 'admin' | 'member';
 
 export interface Store {
-  _id: string;
+  id: string;
   name: string;
   description?: string;
   isActive: boolean;

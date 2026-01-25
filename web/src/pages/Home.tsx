@@ -37,7 +37,7 @@ export function Home() {
 
   useEffect(() => {
     fetchData();
-  }, [currentStore?._id]);
+  }, [currentStore?.id]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('ต้องการลบรายการนี้?')) return;
@@ -45,6 +45,7 @@ export function Home() {
     try {
       await api.deleteTransaction(id);
       fetchData();
+      // Hook ในหน้าอื่นๆ จะดึงข้อมูลใหม่อัตโนมัติ (ไม่มี cache)
     } catch (err) {
       alert(err instanceof Error ? err.message : 'ลบไม่สำเร็จ');
     }

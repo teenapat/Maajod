@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes';
@@ -8,7 +9,12 @@ import { authMiddleware, storeAccessMiddleware } from './middleware/auth.middlew
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: true, // Allow all origins (adjust for production)
+  credentials: true,
+  exposedHeaders: ['x-store-id'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-store-id', 'X-Store-Id'],
+}));
 app.use(express.json());
 
 // Public routes

@@ -21,7 +21,7 @@ export function TransactionList({ transactions, onDelete }: TransactionListProps
   return (
     <div className="transaction-list">
       {transactions.map((tx) => (
-        <div key={tx._id} className={`transaction-item ${tx.type}`}>
+        <div key={tx.id} className={`transaction-item ${tx.type}`}>
           <div className="transaction-icon">
             {tx.type === 'income' ? (
               <TrendingUp size={24} />
@@ -50,7 +50,7 @@ export function TransactionList({ transactions, onDelete }: TransactionListProps
             {onDelete && (
               <button
                 className="transaction-delete"
-                onClick={() => onDelete(tx._id)}
+                onClick={() => onDelete(tx.id)}
                 title="ลบรายการ"
               >
                 <X size={16} />

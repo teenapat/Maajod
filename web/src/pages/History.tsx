@@ -1,8 +1,9 @@
 import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Loader2, TrendingDown, TrendingUp, Wallet, X, XCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../components/Button';
 import { StoreSelector } from '../components/StoreSelector';
 import { useAuth } from '../contexts/AuthContext';
+import { useMonthlySummary } from '../hooks/useMonthlySummary';
 import { api } from '../services/api';
 import { Transaction } from '../types/transaction';
 import { formatMoney, formatThaiDate, getThaiMonthName } from '../utils/date';
@@ -46,36 +47,23 @@ function groupTransactionsByDate(transactions: Transaction[]): DailySummary[] {
 
 export function History() {
   const { currentStore } = useAuth();
-  const [dailySummaries, setDailySummaries] = useState<DailySummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0); // สำหรับ trigger re-fetch
 
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
 
-  const fetchData = async () => {
-    if (!currentStore) {
-      setLoading(false);
-      return;
-    }
+  // ใช้ custom hook (ไม่มี cache - ดึงข้อมูลใหม่ทุกครั้ง)
+  // เพิ่ม refreshKey ใน dependencies เพื่อ trigger re-fetch
+  const { data: summary, loading, error } = useMonthlySummary(
+    currentStore?.id || null,
+    year,
+    month,
+    refreshKey
+  );
 
-    try {
-      setLoading(true);
-      setError('');
-      const data = await api.getMonthlySummary(year, month);
-      setDailySummaries(groupTransactionsByDate(data.transactions));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [year, month, currentStore?._id]);
+  const dailySummaries = summary ? groupTransactionsByDate(summary.transactions) : [];
 
   const handlePrevMonth = () => {
     if (month === 1) {
@@ -104,10 +92,15 @@ export function History() {
 
     try {
       await api.deleteTransaction(id);
-      fetchData();
+      // Trigger re-fetch โดยเปลี่ยน refreshKey
+      setRefreshKey(prev => prev + 1);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'ลบไม่สำเร็จ');
     }
+  };
+
+  const handleStoreChange = () => {
+    // Hook จะดึงข้อมูลใหม่อัตโนมัติเมื่อ store เปลี่ยน
   };
 
   return (
@@ -115,7 +108,7 @@ export function History() {
       <header className="history-header">
         <CalendarDays size={32} className="history-header-icon" />
         <h1 className="history-page-title">ย้อนหลังรายวัน</h1>
-        <StoreSelector onStoreChange={fetchData} />
+        <StoreSelector onStoreChange={handleStoreChange} />
       </header>
 
       <div className="month-selector">
@@ -193,7 +186,7 @@ export function History() {
                   <h4 className="details-title">รายการทั้งหมด ({day.transactions.length})</h4>
                   <ul className="details-list">
                     {day.transactions.map((tx) => (
-                      <li key={tx._id} className={`detail-item ${tx.type}`}>
+                      <li key={tx.id} className={`detail-item ${tx.type}`}>
                         <div className="detail-info">
                           {tx.type === 'income' ? (
                             <TrendingUp size={14} />
@@ -208,7 +201,7 @@ export function History() {
                           </span>
                           <button
                             className="detail-delete"
-                            onClick={() => handleDelete(tx._id)}
+                            onClick={() => handleDelete(tx.id)}
                             title="ลบรายการ"
                           >
                             <X size={14} />

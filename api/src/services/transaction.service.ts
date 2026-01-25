@@ -2,18 +2,18 @@ import {
   transactionRepository,
   CreateTransactionInput,
 } from '../repositories/transaction.repository';
-import { ITransaction } from '../models/transaction.model';
+import { Transaction } from '../models/transaction.model';
 import { getDayRange, getMonthRange } from '../utils/date';
 
 export interface Summary {
   totalIncome: number;
   totalExpense: number;
   net: number;
-  transactions: ITransaction[];
+  transactions: Transaction[];
 }
 
 export class TransactionService {
-  async createTransaction(data: CreateTransactionInput): Promise<ITransaction> {
+  async createTransaction(data: CreateTransactionInput): Promise<Transaction> {
     // Validate storeId
     if (!data.storeId) {
       throw new Error('Store ID is required');
@@ -36,7 +36,7 @@ export class TransactionService {
     storeId: string,
     startDate: Date,
     endDate: Date
-  ): Promise<ITransaction[]> {
+  ): Promise<Transaction[]> {
     return transactionRepository.findByDateRange(storeId, startDate, endDate);
   }
 
@@ -60,9 +60,9 @@ export class TransactionService {
     let totalExpense = 0;
 
     for (const item of aggregated) {
-      if (item._id === 'income') {
+      if (item.type === 'income') {
         totalIncome = item.total;
-      } else if (item._id === 'expense') {
+      } else if (item.type === 'expense') {
         totalExpense = item.total;
       }
     }
@@ -75,7 +75,7 @@ export class TransactionService {
     };
   }
 
-  async deleteTransaction(id: string, storeId: string): Promise<ITransaction | null> {
+  async deleteTransaction(id: string, storeId: string): Promise<Transaction | null> {
     return transactionRepository.delete(id, storeId);
   }
 }
