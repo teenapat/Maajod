@@ -1,12 +1,12 @@
 import { AppDataSource } from '../config/database';
-import { Transaction, TransactionType } from '../models/transaction.model';
+import { Transaction, TransactionType, ExpenseCategory } from '../models/transaction.model';
 import { Repository } from 'typeorm';
 
 export interface CreateTransactionInput {
   storeId: string;
   type: TransactionType;
   amount: number;
-  category?: string;
+  category?: ExpenseCategory;
   note?: string;
   date?: Date;
 }
@@ -20,10 +20,14 @@ export class TransactionRepository {
 
   async create(data: CreateTransactionInput): Promise<Transaction> {
     const transaction = this.transactionRepository.create({
-      ...data,
+      storeId: data.storeId,
+      type: data.type,
+      amount: data.amount,
+      category: data.category,
+      note: data.note,
       date: data.date || new Date(),
     });
-    return this.transactionRepository.save(transaction);
+    return await this.transactionRepository.save(transaction);
   }
 
   async findByDateRange(storeId: string, startDate: Date, endDate: Date): Promise<Transaction[]> {

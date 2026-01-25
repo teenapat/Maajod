@@ -1,11 +1,11 @@
-import 'reflect-metadata';
 import dotenv from 'dotenv';
+import 'reflect-metadata';
 dotenv.config();
 
-import mongoose, { Types } from 'mongoose';
-import * as fs from 'fs';
-import * as path from 'path';
 import { randomUUID } from 'crypto';
+import * as fs from 'fs';
+import mongoose from 'mongoose';
+import * as path from 'path';
 
 // MongoDB connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/maajod';
@@ -72,8 +72,8 @@ function formatDate(date: Date | undefined): string {
   return `'${year}-${month}-${day} ${hours}:${minutes}:${seconds}'`;
 }
 
-function formatBit(value: boolean | undefined, defaultValue: boolean = false): string {
-  return (value !== undefined ? value : defaultValue) ? '1' : '0';
+function formatBit(value: boolean | null | undefined, defaultValue: boolean = false): string {
+  return (value !== undefined && value !== null ? value : defaultValue) ? '1' : '0';
 }
 
 async function exportToSQL() {
@@ -165,6 +165,10 @@ async function exportToSQL() {
     
     let exportedUserStores = 0;
     for (const userStore of mongoUserStores) {
+      if (!userStore.userId || !userStore.storeId) {
+        console.log(`  ⚠ Skipping UserStore: missing userId or storeId`);
+        continue;
+      }
       const userId = idMappings.users.get(userStore.userId.toString());
       const storeId = idMappings.stores.get(userStore.storeId.toString());
 
@@ -195,6 +199,10 @@ async function exportToSQL() {
     
     let exportedTransactions = 0;
     for (const transaction of mongoTransactions) {
+      if (!transaction.storeId) {
+        console.log(`  ⚠ Skipping Transaction: missing storeId`);
+        continue;
+      }
       const storeId = idMappings.stores.get(transaction.storeId.toString());
 
       if (!storeId) {
