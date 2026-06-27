@@ -6,6 +6,14 @@ import { Store } from '../types/store';
 // - Production: ใช้ URL จริง เช่น https://api.example.com
 export const API_BASE = import.meta.env.VITE_API_URL || '';
 
+type RawTransaction = Omit<Transaction, 'id'> & {
+  id?: string;
+  _id?: string;
+};
+
+type RawSummary = Omit<Summary, 'transactions'> & {
+  transactions?: RawTransaction[];
+};
 
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem('token');
@@ -36,6 +44,20 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return response.json();
 }
 
+function normalizeTransaction(tx: RawTransaction): Transaction {
+  return {
+    ...tx,
+    id: tx.id ?? tx._id ?? '',
+  };
+}
+
+function normalizeSummary(summary: RawSummary): Summary {
+  return {
+    ...summary,
+    transactions: (summary.transactions || []).map(normalizeTransaction),
+  };
+}
+
 export const api = {
   // สร้าง Transaction ใหม่
   async createTransaction(data: CreateTransactionInput): Promise<Transaction> {
@@ -44,7 +66,8 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return handleResponse<Transaction>(response);
+    const transaction = await handleResponse<RawTransaction>(response);
+    return normalizeTransaction(transaction);
   },
 
   // ดึงสรุปรายวัน
@@ -53,7 +76,8 @@ export const api = {
     const response = await fetch(`${API_BASE}/api/summary/daily${params}`, {
       headers: getAuthHeaders(),
     });
-    return handleResponse<Summary>(response);
+    const summary = await handleResponse<RawSummary>(response);
+    return normalizeSummary(summary);
   },
 
   // ดึงสรุปรายเดือน
@@ -65,11 +89,40 @@ export const api = {
     const response = await fetch(`${API_BASE}/api/summary/monthly${queryString}`, {
       headers: getAuthHeaders(),
     });
-    return handleResponse<Summary>(response);
+    const summary = await handleResponse<RawSummary>(response);
+    return normalizeSummary(summary);
+  },
+
+  // ดึงสรุปรายไตรมาส
+  async getQuarterlySummary(year?: number, quarter?: number): Promise<Summary> {
+    const params = new URLSearchParams();
+    if (year) params.append('year', year.toString());
+    if (quarter) params.append('quarter', quarter.toString());
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    const response = await fetch(`${API_BASE}/api/summary/quarterly${queryString}`, {
+      headers: getAuthHeaders(),
+    });
+    const summary = await handleResponse<RawSummary>(response);
+    return normalizeSummary(summary);
+  },
+
+  // ดึงสรุปรายปี
+  async getYearlySummary(year?: number): Promise<Summary> {
+    const params = new URLSearchParams();
+    if (year) params.append('year', year.toString());
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    const response = await fetch(`${API_BASE}/api/summary/yearly${queryString}`, {
+      headers: getAuthHeaders(),
+    });
+    const summary = await handleResponse<RawSummary>(response);
+    return normalizeSummary(summary);
   },
 
   // ลบ Transaction
   async deleteTransaction(id: string): Promise<void> {
+    if (!id || id === 'undefined') {
+      throw new Error('ไม่พบรหัสรายการที่จะลบ');
+    }
     const response = await fetch(`${API_BASE}/api/transactions/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),

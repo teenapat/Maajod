@@ -1,40 +1,43 @@
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
-import { Store } from './store.model';
-import { User } from './user.model';
+import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export type StoreRole = 'owner' | 'admin' | 'member';
 
-@Entity('user_stores')
-@Unique(['userId', 'storeId'])
-@Index(['userId'])
-@Index(['storeId'])
-export class UserStore {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
-  @Column('uuid')
-  userId!: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  user?: User;
-
-  @Column('uuid')
-  storeId!: string;
-
-  @ManyToOne(() => Store)
-  @JoinColumn({ name: 'storeId' })
-  store?: Store;
-
-  @Column({ type: 'varchar', length: 20, default: 'member' })
-  role!: StoreRole;
-
-  @Column({ type: 'bit', default: 0 })
-  isDefault!: boolean;
-
-  @CreateDateColumn()
-  createdAt!: Date;
-
-  @UpdateDateColumn()
-  updatedAt!: Date;
+export interface IUserStore extends Document {
+  userId: Types.ObjectId;
+  storeId: Types.ObjectId;
+  role: StoreRole;
+  isDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
+
+const UserStoreSchema = new Schema<IUserStore>(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    storeId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Store',
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ['owner', 'admin', 'member'],
+      default: 'member',
+    },
+    isDefault: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { timestamps: true }
+);
+
+UserStoreSchema.index({ userId: 1, storeId: 1 }, { unique: true });
+UserStoreSchema.index({ userId: 1 });
+UserStoreSchema.index({ storeId: 1 });
+
+export const UserStore = mongoose.model<IUserStore>('UserStore', UserStoreSchema);

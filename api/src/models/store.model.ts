@@ -1,22 +1,30 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import mongoose, { Document, Schema } from 'mongoose';
 
-@Entity('stores')
-export class Store {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
-  @Column({ length: 255 })
-  name!: string;
-
-  @Column({ type: 'ntext', nullable: true })
+export interface IStore extends Document {
+  name: string;
   description?: string;
-
-  @Column({ type: 'bit', default: 1 })
-  isActive!: boolean;
-
-  @CreateDateColumn()
-  createdAt!: Date;
-
-  @UpdateDateColumn()
-  updatedAt!: Date;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
+
+const StoreSchema = new Schema<IStore>(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    description: {
+      type: String,
+      default: '',
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  { timestamps: true }
+);
+
+export const Store = mongoose.model<IStore>('Store', StoreSchema);

@@ -1,19 +1,9 @@
-import { AppDataSource } from '../config/database';
-import { User } from '../models/user.model';
-import { Repository } from 'typeorm';
+import { User, IUser } from '../models/user.model';
 
 export class AuthService {
-  private userRepository: Repository<User>;
-
-  constructor() {
-    this.userRepository = AppDataSource.getRepository(User);
-  }
-
   // Login ด้วย username/password
-  async login(username: string, password: string): Promise<User | null> {
-    const user = await this.userRepository.findOne({
-      where: { username: username.toLowerCase() },
-    });
+  async login(username: string, password: string): Promise<IUser | null> {
+    const user = await User.findOne({ username: username.toLowerCase() });
     if (!user) return null;
 
     const isValid = await user.comparePassword(password);
@@ -28,36 +18,29 @@ export class AuthService {
     password: string,
     name: string,
     role: 'admin' | 'user' = 'user'
-  ): Promise<User> {
-    const existingUser = await this.userRepository.findOne({
-      where: { username: username.toLowerCase() },
-    });
+  ): Promise<IUser> {
+    const existingUser = await User.findOne({ username: username.toLowerCase() });
     if (existingUser) {
       throw new Error('Username นี้ถูกใช้แล้ว');
     }
 
-    const user = this.userRepository.create({
+    const user = new User({
       username: username.toLowerCase(),
       password,
       name,
       role,
     });
-    return this.userRepository.save(user);
+    return user.save();
   }
 
   // ดึง user ทั้งหมด
-  async getAllUsers(): Promise<User[]> {
-    return this.userRepository.find({
-      select: ['id', 'username', 'name', 'role', 'createdAt', 'updatedAt'],
-    });
+  async getAllUsers(): Promise<IUser[]> {
+    return User.find().select('username name role createdAt updatedAt');
   }
 
   // ดึง user by ID
-  async getUserById(userId: string): Promise<User | null> {
-    return this.userRepository.findOne({
-      where: { id: userId },
-      select: ['id', 'username', 'name', 'role', 'createdAt', 'updatedAt'],
-    });
+  async getUserById(userId: string): Promise<IUser | null> {
+    return User.findById(userId).select('username name role createdAt updatedAt');
   }
 
   // เปลี่ยน password
@@ -66,16 +49,14 @@ export class AuthService {
     oldPassword: string,
     newPassword: string
   ): Promise<boolean> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-    });
+    const user = await User.findById(userId);
     if (!user) return false;
 
     const isValid = await user.comparePassword(oldPassword);
     if (!isValid) return false;
 
     user.password = newPassword;
-    await this.userRepository.save(user);
+    await user.save();
     return true;
   }
 }

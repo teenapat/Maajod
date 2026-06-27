@@ -1,0 +1,181 @@
+.tx-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 16, 34, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: tx-fade-in 0.2s ease;
+  /* ขยับขึ้นกลางค่อนบน + เว้นขอบจอ */
+  padding: var(--spacing-md);
+  padding-bottom: calc(84px + env(safe-area-inset-bottom));
+}
+
+.tx-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  max-height: 92vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  animation: tx-slide-up 0.25s ease;
+}
+
+/* แถบหัวเต็มความกว้าง + ปุ่ม X มุมขวา */
+.tx-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: 10px 8px 10px 14px;
+  flex-shrink: 0;
+  color: #ffffff;
+}
+
+.tx-modal-header.income {
+  background: linear-gradient(135deg, var(--color-income) 0%, #16a34a 100%);
+}
+
+.tx-modal-header.expense {
+  background: linear-gradient(135deg, var(--color-expense) 0%, #dc2626 100%);
+}
+
+.tx-modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.tx-modal-header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+}
+
+.tx-modal-header-title {
+  font-weight: 700;
+  font-size: var(--font-size-md);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ปิด — override global button (min-height 58px) */
+.tx-modal-close {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.tx-modal-close:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.tx-modal-close:active {
+  transform: scale(0.94);
+}
+
+.tx-modal-close svg {
+  display: block;
+  pointer-events: none;
+}
+
+.tx-modal-body {
+  padding: var(--spacing-md);
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ฟอร์มใน modal: ไม่มีกรอบซ้อน + ไม่มี label */
+.tx-modal-body .form-card {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+  gap: var(--spacing-sm);
+}
+
+.tx-modal-body .input-label {
+  display: none;
+}
+
+.tx-modal-body .input-group {
+  gap: 0;
+}
+
+.tx-modal-body .form-success {
+  min-height: 200px;
+}
+
+@keyframes tx-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes tx-slide-up {
+  from { transform: translateY(24px); opacity: 0.6; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@media (min-width: 768px) {
+  .tx-modal-backdrop {
+    align-items: center;
+    padding: var(--spacing-lg);
+  }
+
+  .tx-modal-card {
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: tx-zoom-in 0.2s ease;
+  }
+
+  .tx-modal-body {
+    padding: var(--spacing-lg);
+  }
+
+  .tx-modal-body .form-card {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@keyframes tx-zoom-in {
+  from { transform: scale(0.96); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .tx-modal-card {
+    background: #142449;
+    border-color: #35508c;
+  }
+}

@@ -1,40 +1,20 @@
-import 'reflect-metadata';
-import { DataSource } from 'typeorm';
-import { Store } from '../models/store.model';
-import { Transaction } from '../models/transaction.model';
-import { UserStore } from '../models/user-store.model';
-import { User } from '../models/user.model';
+import mongoose from 'mongoose';
 
-export const AppDataSource = new DataSource({
-  type: 'mssql',
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT),
-  username: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-  options: {
-    encrypt: true,
-    trustServerCertificate: true,
-    enableArithAbort: true,
-  },
-  entities: [User, Store, Transaction, UserStore],
-  synchronize: true, // ใช้ true สำหรับ development, ใช้ migrations สำหรับ production
-  logging: false,
-});
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/maajod';
 
 export async function connectDatabase(): Promise<void> {
   try {
-    console.log('🔌 Connecting to SQL Server...');
-    
-    if (!AppDataSource.isInitialized) {
-      await AppDataSource.initialize();
+    console.log('🔌 Connecting to MongoDB...');
+
+    if (mongoose.connection.readyState === 0) {
+      await mongoose.connect(MONGODB_URI);
     }
-    
-    console.log('✅ Connected to SQL Server');
+
+    console.log('✅ Connected to MongoDB');
   } catch (error) {
-    console.error('❌ SQL Server connection error:', error);
+    console.error('❌ MongoDB connection error:', error);
     throw error;
   }
 }
 
-export default { connectDatabase, AppDataSource };
+export default { connectDatabase };

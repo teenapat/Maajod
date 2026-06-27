@@ -1,11 +1,10 @@
-import { Hand, Loader2, Receipt, Sparkles, TrendingDown, TrendingUp } from 'lucide-react';
+import { Hand, Loader2, Minus, Plus, Receipt, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '../components/Button';
 import { SummaryCard } from '../components/SummaryCard';
 import { TransactionList } from '../components/TransactionList';
 import { StoreSelector } from '../components/StoreSelector';
 import { useAuth } from '../contexts/AuthContext';
+import { useTransactionModal } from '../contexts/TransactionModalContext';
 import { api } from '../services/api';
 import { Summary } from '../types/transaction';
 import { formatThaiDate, getToday } from '../utils/date';
@@ -13,6 +12,7 @@ import './Home.css';
 
 export function Home() {
   const { user, currentStore } = useAuth();
+  const { version, openModal } = useTransactionModal();
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -37,7 +37,7 @@ export function Home() {
 
   useEffect(() => {
     fetchData();
-  }, [currentStore?.id]);
+  }, [currentStore?.id, version]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('ต้องการลบรายการนี้?')) return;
@@ -103,7 +103,7 @@ export function Home() {
 
       {summary && (
         <div className="home-content">
-          {/* Left column: Summary + Actions */}
+          {/* Left column: Summary */}
           <div className="home-main">
             <SummaryCard
               title="สรุปวันนี้"
@@ -112,19 +112,24 @@ export function Home() {
               net={summary.net}
             />
 
+            {/* ปุ่มเพิ่มรายรับ/รายจ่าย (เฉพาะ desktop) */}
             <div className="home-actions">
-              <Link to="/income">
-                <Button variant="income" size="lg" fullWidth>
-                  <TrendingUp size={24} />
-                  เพิ่มรายรับ
-                </Button>
-              </Link>
-              <Link to="/expense">
-                <Button variant="expense" size="lg" fullWidth>
-                  <TrendingDown size={24} />
-                  เพิ่มรายจ่าย
-                </Button>
-              </Link>
+              <button
+                type="button"
+                className="home-action-btn income"
+                onClick={() => openModal('income')}
+              >
+                <Plus size={22} strokeWidth={2.5} />
+                <span>รายรับ</span>
+              </button>
+              <button
+                type="button"
+                className="home-action-btn expense"
+                onClick={() => openModal('expense')}
+              >
+                <Minus size={22} strokeWidth={2.5} />
+                <span>รายจ่าย</span>
+              </button>
             </div>
           </div>
 

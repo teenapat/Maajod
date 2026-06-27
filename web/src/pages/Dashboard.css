@@ -8,6 +8,7 @@
   align-items: center;
   text-align: center;
   padding: var(--spacing-lg) 0 var(--spacing-sm);
+  gap: 6px;
 }
 
 .dashboard-header-icon {
@@ -26,9 +27,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 40vh;
+  min-height: 220px;
   gap: var(--spacing-md);
   color: var(--color-text-light);
+  background: var(--surface-2);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
 }
 
 @media (min-width: 768px) {
@@ -43,6 +47,131 @@
   gap: var(--spacing-md);
 }
 
+/* ===== Controls bar (tabs + period selector) ===== */
+.dashboard-controls {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Period Tabs ===== */
+.summary-period-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-xs);
+  margin: var(--spacing-sm) 0;
+  background: var(--surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 4px;
+}
+
+.summary-period-tab {
+  border: 0;
+  background: transparent;
+  color: var(--color-text-light);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.summary-period-tab:hover {
+  color: var(--color-text);
+  background: var(--surface-1);
+}
+
+.summary-period-tab.active {
+  background: var(--surface-1);
+  color: var(--color-primary-light);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===== Comparison Cards ===== */
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.compare-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-sm);
+  border-top: 3px solid var(--color-border);
+}
+
+.compare-card.income {
+  border-top-color: var(--color-income);
+}
+
+.compare-card.expense {
+  border-top-color: var(--color-expense);
+}
+
+.compare-card.net {
+  border-top-color: var(--color-primary);
+}
+
+.compare-card-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-light);
+  white-space: nowrap;
+}
+
+.compare-card-value {
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.compare-card-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.compare-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.compare-trend.good {
+  color: var(--color-income);
+}
+
+.compare-trend.bad {
+  color: var(--color-expense);
+}
+
+.compare-trend.flat {
+  color: var(--color-text-light);
+}
+
+.compare-prev {
+  font-size: 0.78rem;
+  color: var(--color-text-light);
+}
+
+@media (min-width: 768px) {
+  .summary-period-tabs {
+    max-width: 420px;
+  }
+}
+
 /* Stats Grid */
 .stats-grid {
   display: grid;
@@ -51,14 +180,15 @@
 }
 
 .stat-card {
-  background: white;
+  background: var(--surface-1);
   border-radius: var(--radius-lg);
   padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-soft);
 }
 
 .stat-card.income {
@@ -115,11 +245,12 @@
 
 /* Net Card */
 .net-card {
-  background: white;
+  background: var(--surface-1);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .net-card.positive {
@@ -141,11 +272,11 @@
 }
 
 .net-card.positive .net-header {
-  color: var(--color-income);
+  color: #166534;
 }
 
 .net-card.negative .net-header {
-  color: var(--color-expense);
+  color: #991b1b;
 }
 
 .net-value {
@@ -155,11 +286,13 @@
 }
 
 .net-card.positive .net-value {
-  color: var(--color-primary-dark);
+  color: #14532d;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .net-card.negative .net-value {
   color: #991B1B;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .net-status {
@@ -171,11 +304,13 @@
 }
 
 .net-card.positive .net-status {
-  color: var(--color-income);
+  color: #166534;
+  font-weight: 700;
 }
 
 .net-card.negative .net-status {
-  color: var(--color-expense);
+  color: #991b1b;
+  font-weight: 700;
 }
 
 /* Dashboard Section */
@@ -345,26 +480,33 @@
 }
 
 .chart-container {
-  background: white;
+  background: var(--surface-1);
   border-radius: var(--radius-lg);
   padding: var(--spacing-md);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-soft);
   overflow: visible;
 }
 
 .chart-tooltip {
-  background: white;
-  border: 1px solid var(--color-border);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: var(--radius-md);
   padding: var(--spacing-sm) var(--spacing-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.35);
   font-size: var(--font-size-sm);
 }
 
-.chart-tooltip-label {
+.chart-tooltip p {
+  color: #0f172a;
   font-weight: 600;
+  margin: 0;
+}
+
+.chart-tooltip-label {
+  font-weight: 700;
   margin-bottom: 4px;
-  color: var(--color-text);
+  color: #0f172a;
 }
 
 /* Pie Chart */
@@ -396,6 +538,23 @@
   background: var(--color-bg);
   padding: 6px 12px;
   border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+}
+
+@media (prefers-color-scheme: dark) {
+  .stat-card,
+  .net-card,
+  .chart-container,
+  .highlight-card,
+  .comparison-card,
+  .bar-chart {
+    background: var(--surface-1);
+    border: 1px solid var(--border-soft);
+  }
+
+  .pie-legend-item {
+    background: var(--surface-2);
+  }
 }
 
 .pie-legend-color {
@@ -501,6 +660,34 @@
     text-align: left;
     gap: var(--spacing-sm);
     padding: var(--spacing-md) 0;
+  }
+
+  /* แถบควบคุมแนวนอนยาว + เส้นคั่นแยกจากผลลัพธ์ด้านล่าง */
+  .dashboard-controls {
+    flex-direction: row;
+    align-items: stretch;
+    gap: var(--spacing-lg);
+    flex-wrap: nowrap;
+    padding-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    border-bottom: 2px solid var(--border-soft);
+  }
+
+  .dashboard-controls .summary-period-tabs {
+    margin: 0;
+    flex: 0 0 auto;
+    width: auto;
+    align-items: stretch;
+  }
+
+  .month-selector {
+    justify-content: flex-start;
+    max-width: 420px;
+  }
+
+  .dashboard-controls .month-selector {
+    margin: 0;
+    flex: 1 1 320px;
   }
 
   .dashboard-header-icon {
@@ -639,6 +826,30 @@
     grid-column: span 2;
   }
 
+  /* Comparison section: เต็มความกว้าง + การ์ดอยู่ข้างกราฟ */
+  .compare-section {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    grid-template-rows: auto 1fr;
+    gap: var(--spacing-md) var(--spacing-lg);
+    align-items: start;
+  }
+
+  .compare-section .section-title {
+    grid-column: 1 / -1;
+  }
+
+  .compare-section .compare-grid {
+    grid-template-columns: 1fr;
+    margin-bottom: 0;
+    align-self: stretch;
+  }
+
+  .compare-section .chart-container {
+    height: 100%;
+  }
+
   /* Pie chart แต่ละตัวใช้ 1 column */
   .chart-section:has(.pie-chart-container) {
     grid-column: span 1;
@@ -730,6 +941,16 @@
   /* Regular dashboard sections */
   .dashboard-section:not(.chart-section) {
     grid-column: span 1;
+  }
+
+  /* Comparison section: เต็มความกว้าง + การ์ด 3 ใบเรียงแนวนอนข้างกราฟ */
+  .dashboard-section.compare-section {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(420px, 1fr) 2fr;
+  }
+
+  .compare-section .compare-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 

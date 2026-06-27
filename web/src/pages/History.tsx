@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Button } from '../components/Button';
 import { StoreSelector } from '../components/StoreSelector';
 import { useAuth } from '../contexts/AuthContext';
+import { useTransactionModal } from '../contexts/TransactionModalContext';
 import { useMonthlySummary } from '../hooks/useMonthlySummary';
 import { api } from '../services/api';
 import { Transaction } from '../types/transaction';
@@ -47,6 +48,7 @@ function groupTransactionsByDate(transactions: Transaction[]): DailySummary[] {
 
 export function History() {
   const { currentStore } = useAuth();
+  const { version } = useTransactionModal();
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0); // สำหรับ trigger re-fetch
 
@@ -60,7 +62,7 @@ export function History() {
     currentStore?.id || null,
     year,
     month,
-    refreshKey
+    refreshKey + version
   );
 
   const dailySummaries = summary ? groupTransactionsByDate(summary.transactions) : [];
@@ -205,6 +207,7 @@ export function History() {
                             title="ลบรายการ"
                           >
                             <X size={14} />
+                            <span>ลบ</span>
                           </button>
                         </div>
                       </li>

@@ -9,9 +9,10 @@
   align-items: flex-start;
   gap: min(3vw, 16px);
   padding: min(3vw, 16px);
-  background: white;
+  background: var(--surface-1);
   border-radius: var(--radius-md);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-sm);
   animation: slideIn 0.3s ease;
 }
 
@@ -106,14 +107,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  min-height: 28px;
-  padding: 0;
+  gap: 4px;
+  min-height: 34px;
+  padding: 0 8px;
   font-size: 14px;
   background: var(--color-expense-bg);
   color: var(--color-expense);
   border-radius: var(--radius-sm);
+  border: 1px solid #fecaca;
   opacity: 0.7;
 }
 
@@ -123,11 +124,16 @@
   color: white;
 }
 
+.transaction-delete span {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .transaction-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
   color: var(--color-text-light);
   text-align: center;
 }
@@ -135,4 +141,51 @@
 .transaction-empty svg {
   margin-bottom: var(--spacing-sm);
   opacity: 0.5;
+}
+
+@media (min-width: 1024px) {
+  .transaction-list {
+    gap: 10px;
+  }
+
+  .transaction-item {
+    align-items: center;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 14px;
+    padding: 12px 14px;
+  }
+
+  .transaction-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .transaction-type {
+    font-size: 1rem;
+  }
+
+  .transaction-date {
+    font-size: 0.9rem;
+  }
+
+  .transaction-note {
+    font-size: 0.88rem;
+    max-width: 380px;
+  }
+
+  .transaction-right {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .transaction-delete {
+    min-height: 30px;
+    padding: 0 7px;
+  }
+
+  .transaction-delete span {
+    display: none;
+  }
 }

@@ -6,10 +6,11 @@
   right: 0;
   display: flex;
   justify-content: stretch;
-  background: white;
-  padding: 6px 0;
-  padding-bottom: max(6px, env(safe-area-inset-bottom));
+  background: var(--surface-1);
+  padding: 8px 6px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  border-top: 1px solid var(--border-soft);
   z-index: 100;
 }
 
@@ -20,7 +21,7 @@
   justify-content: center;
   text-decoration: none;
   color: var(--color-text-light);
-  padding: 4px 2px;
+  padding: 8px 4px;
   border-radius: var(--radius-sm);
   transition: all 0.2s ease;
   flex: 1;
@@ -32,21 +33,42 @@
 }
 
 .nav-icon {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   stroke-width: 2;
   transition: transform 0.2s ease;
   flex-shrink: 0;
 }
 
 .nav-label {
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 600;
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+}
+
+/* จอเล็กมาก: ลดขนาดให้ครบ 7 เมนูพอดี */
+@media (max-width: 380px) {
+  .navbar {
+    padding: 6px 2px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+  }
+
+  .nav-item {
+    padding: 6px 2px;
+  }
+
+  .nav-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .nav-label {
+    font-size: 0.64rem;
+  }
 }
 
 .nav-item.active {
@@ -69,12 +91,82 @@
   background: none;
   border: none;
   color: var(--color-text-light);
-  min-height: auto;
-  padding: 4px 2px;
+  min-height: 0;
+  padding: 8px 4px;
 }
 
 .nav-item.logout:hover {
   color: var(--color-expense);
+}
+
+/* ===== ปุ่มเพิ่มรายรับ/รายจ่าย แยกกัน กดง่ายสำหรับผู้สูงอายุ (mobile) ===== */
+.nav-action-btn {
+  flex: 1;
+  min-width: 0;
+  min-height: 0 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 2px !important;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.nav-action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.nav-action-btn.income .nav-action-icon {
+  background: linear-gradient(135deg, var(--color-income) 0%, #16a34a 100%);
+}
+
+.nav-action-btn.expense .nav-action-icon {
+  background: linear-gradient(135deg, var(--color-expense) 0%, #dc2626 100%);
+}
+
+.nav-action-btn:active .nav-action-icon {
+  transform: scale(0.92);
+}
+
+.nav-action-btn:hover .nav-action-icon {
+  filter: brightness(1.08);
+}
+
+.nav-action-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.nav-action-btn.income .nav-action-label {
+  color: var(--color-income);
+}
+
+.nav-action-btn.expense .nav-action-label {
+  color: var(--color-expense);
+}
+
+@media (max-width: 380px) {
+  .nav-action-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .nav-action-label {
+    font-size: 0.64rem;
+  }
 }
 
 /* App title - hidden on mobile */
@@ -95,7 +187,9 @@
     justify-content: flex-start;
     padding: var(--spacing-md) var(--spacing-sm);
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
-    gap: var(--spacing-xs);
+    border-top: none;
+    border-right: 1px solid var(--border-soft);
+    gap: 6px;
   }
 
   .nav-app-title {
@@ -128,9 +222,9 @@
   .nav-item {
     flex-direction: row;
     justify-content: flex-start;
-    padding: var(--spacing-sm);
+    padding: 10px 12px;
     gap: var(--spacing-sm);
-    border-radius: var(--radius-md);
+    border-radius: 12px;
     flex: 0;
   }
 
@@ -143,12 +237,12 @@
   }
 
   .nav-icon {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
 
   .nav-label {
-    font-size: var(--font-size-sm);
+    font-size: 0.9rem;
     margin-top: 0;
   }
 
@@ -157,5 +251,36 @@
     padding: var(--spacing-sm);
     border-top: 1px solid var(--color-border);
     padding-top: var(--spacing-md);
+  }
+
+  /* desktop ใช้ปุ่มลอย (FAB) แทน */
+  .nav-action-btn {
+    display: none;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .navbar {
+    box-shadow: 4px 0 18px rgba(2, 6, 23, 0.4);
+  }
+
+  .nav-app-title {
+    border-bottom-color: var(--surface-3);
+  }
+
+  .nav-app-name {
+    color: var(--color-text);
+  }
+
+  .nav-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .nav-item.active {
+    background: rgba(74, 124, 67, 0.28);
+  }
+
+  .nav-item.logout {
+    border-top-color: var(--surface-3);
   }
 }

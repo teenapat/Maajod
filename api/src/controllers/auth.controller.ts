@@ -1,17 +1,9 @@
 import { Request, Response } from 'express';
-import { Repository } from 'typeorm';
-import { AppDataSource } from '../config/database';
 import { AuthRequest, generateToken } from '../middleware/auth.middleware';
 import { User } from '../models/user.model';
 import { storeService } from '../services/store.service';
 
 export class AuthController {
-  private userRepository: Repository<User>;
-
-  constructor() {
-    this.userRepository = AppDataSource.getRepository(User);
-  }
-
   // POST /api/auth/login
   async login(req: Request, res: Response): Promise<void> {
     try {
@@ -22,8 +14,8 @@ export class AuthController {
         return;
       }
 
-      const user = await this.userRepository.findOne({
-        where: { username: username.toLowerCase() },
+      const user = await User.findOne({
+        username: username.toLowerCase(),
       });
 
       if (!user) {
@@ -39,14 +31,14 @@ export class AuthController {
       }
 
       // ดึงร้านทั้งหมดของ user
-      const stores = await storeService.getStoresByUserId(user.id);
+      const stores = await storeService.getStoresByUserId(user._id.toString());
       
       // หา default store หรือใช้ store แรก
       const defaultStore = stores.find(s => s.isDefault) || stores[0];
       const defaultStoreId = defaultStore?.id || null;
 
       const token = generateToken({
-        id: user.id,
+        id: user._id.toString(),
         username: user.username,
         name: user.name,
         role: user.role,
@@ -55,7 +47,7 @@ export class AuthController {
       res.json({
         token,
         user: {
-          id: user.id,
+          id: user._id.toString(),
           username: user.username,
           name: user.name,
           role: user.role,
@@ -80,27 +72,25 @@ export class AuthController {
       }
 
       // เช็คว่า username ซ้ำไหม
-      const existingUser = await this.userRepository.findOne({
-        where: { username: username.toLowerCase() },
-      });
+      const existingUser = await User.findOne({ username: username.toLowerCase() });
       if (existingUser) {
         res.status(400).json({ error: 'username นี้ถูกใช้แล้ว' });
         return;
       }
 
-      const user = this.userRepository.create({
+      const user = new User({
         username: username.toLowerCase(),
         password,
         name,
         role: role || 'user',
       });
 
-      const savedUser = await this.userRepository.save(user);
+      const savedUser = await user.save();
 
       res.status(201).json({
         message: 'สร้างผู้ใช้สำเร็จ',
         user: {
-          id: savedUser.id,
+          id: savedUser._id.toString(),
           username: savedUser.username,
           name: savedUser.name,
           role: savedUser.role,

@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { transactionService } from '../services/transaction.service';
-import { parseDate } from '../utils/date';
+import { getDayRange, parseDate } from '../utils/date';
 import { AuthRequest } from '../middleware/auth.middleware';
 
 export class TransactionController {
@@ -52,8 +52,8 @@ export class TransactionController {
 
       const transactions = await transactionService.getTransactionsByDateRange(
         req.storeId,
-        parseDate(startDate as string),
-        parseDate(endDate as string)
+        getDayRange(parseDate(startDate as string)).start,
+        getDayRange(parseDate(endDate as string)).end
       );
 
       res.json(transactions);
@@ -103,6 +103,55 @@ export class TransactionController {
       }
 
       const summary = await transactionService.getMonthlySummary(req.storeId, targetYear, targetMonth);
+
+      res.json(summary);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      res.status(400).json({ error: message });
+    }
+  }
+
+  // GET /api/summary/quarterly?year=YYYY&quarter=1-4
+  async getQuarterlySummary(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const { year, quarter } = req.query;
+
+      if (!req.storeId) {
+        res.status(400).json({ error: 'Store ID is required' });
+        return;
+      }
+
+      const now = new Date();
+      const targetYear = year ? Number(year) : now.getFullYear();
+      const targetQuarter = quarter ? Number(quarter) : Math.floor(now.getMonth() / 3) + 1;
+
+      if (targetQuarter < 1 || targetQuarter > 4) {
+        res.status(400).json({ error: 'Quarter must be between 1 and 4' });
+        return;
+      }
+
+      const summary = await transactionService.getQuarterlySummary(req.storeId, targetYear, targetQuarter);
+
+      res.json(summary);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      res.status(400).json({ error: message });
+    }
+  }
+
+  // GET /api/summary/yearly?year=YYYY
+  async getYearlySummary(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const { year } = req.query;
+
+      if (!req.storeId) {
+        res.status(400).json({ error: 'Store ID is required' });
+        return;
+      }
+
+      const now = new Date();
+      const targetYear = year ? Number(year) : now.getFullYear();
+      const summary = await transactionService.getYearlySummary(req.storeId, targetYear);
 
       res.json(summary);
     } catch (error) {

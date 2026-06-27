@@ -54,6 +54,7 @@ export function TransactionList({ transactions, onDelete }: TransactionListProps
                 title="ลบรายการ"
               >
                 <X size={16} />
+                <span>ลบ</span>
               </button>
             )}
           </div>

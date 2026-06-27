@@ -11,6 +11,8 @@ router.delete('/transactions/:id', (req, res) => transactionController.delete(re
 // Summary
 router.get('/summary/daily', (req, res) => transactionController.getDailySummary(req, res));
 router.get('/summary/monthly', (req, res) => transactionController.getMonthlySummary(req, res));
+router.get('/summary/quarterly', (req, res) => transactionController.getQuarterlySummary(req, res));
+router.get('/summary/yearly', (req, res) => transactionController.getYearlySummary(req, res));
 
 export default router;
 

@@ -1,18 +1,18 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { NavBar } from './components/NavBar';
-import { Home } from './pages/Home';
-import { Income } from './pages/Income';
-import { Expense } from './pages/Expense';
-import { Summary } from './pages/Summary';
-import { History } from './pages/History';
-import { Dashboard } from './pages/Dashboard';
-import { Login } from './pages/Login';
 import { Loader2 } from 'lucide-react';
+import { ReactNode } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { NavBar } from './components/NavBar';
+import { TransactionModal } from './components/TransactionModal';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { TransactionModalProvider } from './contexts/TransactionModalContext';
+import { Dashboard } from './pages/Dashboard';
+import { History } from './pages/History';
+import { Home } from './pages/Home';
+import { Login } from './pages/Login';
 import './styles/global.css';
 
-// Protected Route Component
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+// Layout สำหรับหน้าที่ต้องล็อกอิน: เนื้อหา + เมนู + modal
+function ProtectedLayout({ children }: { children: ReactNode }) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
@@ -28,7 +28,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />;
   }
 
-  return <>{children}</>;
+  return (
+    <TransactionModalProvider>
+      <div className="container">{children}</div>
+      <NavBar />
+      <TransactionModal />
+    </TransactionModalProvider>
+  );
 }
 
 function AppRoutes() {
@@ -37,72 +43,13 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <div className="container">
-              <Home />
-            </div>
-            <NavBar />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/income"
-        element={
-          <ProtectedRoute>
-            <div className="container">
-              <Income />
-            </div>
-            <NavBar />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/expense"
-        element={
-          <ProtectedRoute>
-            <div className="container">
-              <Expense />
-            </div>
-            <NavBar />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/summary"
-        element={
-          <ProtectedRoute>
-            <div className="container">
-              <Summary />
-            </div>
-            <NavBar />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/history"
-        element={
-          <ProtectedRoute>
-            <div className="container">
-              <History />
-            </div>
-            <NavBar />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <div className="container">
-              <Dashboard />
-            </div>
-            <NavBar />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/" element={<ProtectedLayout><Home /></ProtectedLayout>} />
+      <Route path="/history" element={<ProtectedLayout><History /></ProtectedLayout>} />
+      <Route path="/dashboard" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
+      {/* เส้นทางเดิม: แปลงเป็น modal แล้ว จึง redirect กลับหน้าหลัก */}
+      <Route path="/income" element={<Navigate to="/" replace />} />
+      <Route path="/expense" element={<Navigate to="/" replace />} />
+      <Route path="/summary" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }

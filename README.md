@@ -16,8 +16,7 @@ Designed for elderly users with large buttons and easy-to-read text.
 
 ### Prerequisites
 - Node.js 18+
-- SQL Server (Express edition or higher)
-- MongoDB (for data migration only, if migrating from existing MongoDB database)
+- MongoDB (Atlas or local)
 
 ### 1. Clone & Install
 
@@ -37,43 +36,23 @@ Create `api/.env`:
 
 ```env
 PORT=3001
-# SQL Server Connection
-DB_HOST=localhost\SQLEXPRESS
-DB_PORT=1433
-DB_USER=your_username
-DB_PASS=your_password
-DB_NAME=maajod
 
 # JWT Secret
 JWT_SECRET=your-secret-key
 
-# MongoDB (only needed for migration from MongoDB)
+# MongoDB (runtime database)
 MONGODB_URI=mongodb://localhost:27017/maajod
 ```
 
+Tip: copy from `api/.env.example` and fill values.
+
 ### 3. Database Setup
 
-#### Option A: Fresh Start (New Database)
-The database tables will be created automatically when you start the API server (TypeORM synchronize).
+#### Option A: Fresh Start (MongoDB)
+Start API with `MONGODB_URI` configured. Collections and indexes are managed by Mongoose models.
 
-#### Option B: Migrate from MongoDB (if you have existing data)
-
-```bash
-cd api
-npm run migrate:mongo-to-sql
-```
-
-This will:
-- Connect to MongoDB and read all data
-- Create tables in SQL Server (if not exist)
-- Migrate Users, Stores, UserStores, and Transactions
-- Generate new UUIDs for all records
-- Preserve Thai characters in names, descriptions, and notes
-
-**Note:** Make sure to:
-- Stop the API server before running migration
-- Close any SQL Server Management Studio connections
-- Have both MongoDB and SQL Server running
+#### Option B: Restore existing MongoDB data
+Import data from your MongoDB backup/Atlas snapshot using your preferred MongoDB tooling.
 
 ### 4. Run Development
 
@@ -167,8 +146,8 @@ User ←→ UserStore ←→ Store
 
 - **Frontend:** React + TypeScript + Vite
 - **Backend:** Node.js + Express + TypeScript
-- **Database:** SQL Server (Microsoft SQL Server)
-- **ORM:** TypeORM
+- **Database:** MongoDB (Atlas/local)
+- **Data Access:** Mongoose
 - **Icons:** Lucide React
 
 ---

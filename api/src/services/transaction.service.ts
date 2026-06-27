@@ -2,18 +2,18 @@ import {
   transactionRepository,
   CreateTransactionInput,
 } from '../repositories/transaction.repository';
-import { Transaction } from '../models/transaction.model';
-import { getDayRange, getMonthRange } from '../utils/date';
+import { ITransaction } from '../models/transaction.model';
+import { getDayRange, getMonthRange, getQuarterRange, getYearRange } from '../utils/date';
 
 export interface Summary {
   totalIncome: number;
   totalExpense: number;
   net: number;
-  transactions: Transaction[];
+  transactions: ITransaction[];
 }
 
 export class TransactionService {
-  async createTransaction(data: CreateTransactionInput): Promise<Transaction> {
+  async createTransaction(data: CreateTransactionInput): Promise<ITransaction> {
     // Validate storeId
     if (!data.storeId) {
       throw new Error('Store ID is required');
@@ -36,7 +36,7 @@ export class TransactionService {
     storeId: string,
     startDate: Date,
     endDate: Date
-  ): Promise<Transaction[]> {
+  ): Promise<ITransaction[]> {
     return transactionRepository.findByDateRange(storeId, startDate, endDate);
   }
 
@@ -47,6 +47,16 @@ export class TransactionService {
 
   async getMonthlySummary(storeId: string, year: number, month: number): Promise<Summary> {
     const { start, end } = getMonthRange(year, month);
+    return this.getSummary(storeId, start, end);
+  }
+
+  async getQuarterlySummary(storeId: string, year: number, quarter: number): Promise<Summary> {
+    const { start, end } = getQuarterRange(year, quarter);
+    return this.getSummary(storeId, start, end);
+  }
+
+  async getYearlySummary(storeId: string, year: number): Promise<Summary> {
+    const { start, end } = getYearRange(year);
     return this.getSummary(storeId, start, end);
   }
 
@@ -75,7 +85,7 @@ export class TransactionService {
     };
   }
 
-  async deleteTransaction(id: string, storeId: string): Promise<Transaction | null> {
+  async deleteTransaction(id: string, storeId: string): Promise<ITransaction | null> {
     return transactionRepository.delete(id, storeId);
   }
 }

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { AppDataSource } from '../config/database';
+import { Types } from 'mongoose';
 import { UserStore } from '../models/user-store.model';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'maajod-secret-key-2024';
@@ -40,7 +40,6 @@ export async function storeAccessMiddleware(req: AuthRequest, res: Response, nex
     // รับ storeId จาก header หรือ query (รองรับหลายรูปแบบ)
     let storeId: string | undefined = 
       (req.headers['x-store-id'] as string) ||
-      (req.headers['X-Store-Id'] as string) ||
       (req.query.storeId as string);
 
     // กรอง "undefined" string ออก
@@ -54,7 +53,7 @@ export async function storeAccessMiddleware(req: AuthRequest, res: Response, nex
         const { storeService } = await import('../services/store.service');
         const defaultUserStore = await storeService.getDefaultStore(req.user.id);
         if (defaultUserStore) {
-          storeId = defaultUserStore.storeId;
+          storeId = defaultUserStore.storeId.toString();
           console.log(`✅ Using default store: ${storeId} for user ${req.user.id}`);
         } else {
           // ถ้าไม่มี default store ให้ลองใช้ store แรก
@@ -84,14 +83,15 @@ export async function storeAccessMiddleware(req: AuthRequest, res: Response, nex
       res.status(401).json({ error: 'กรุณาเข้าสู่ระบบ' });
       return;
     }
+    if (!Types.ObjectId.isValid(req.user.id) || !Types.ObjectId.isValid(storeId)) {
+      res.status(400).json({ error: 'Store ID ไม่ถูกต้อง' });
+      return;
+    }
 
     // ตรวจสอบว่า user มีสิทธิ์เข้าถึง store นี้หรือไม่
-    const userStoreRepository = AppDataSource.getRepository(UserStore);
-    const userStore = await userStoreRepository.findOne({
-      where: {
-        userId: req.user.id,
-        storeId: storeId,
-      },
+    const userStore = await UserStore.findOne({
+      userId: new Types.ObjectId(req.user.id),
+      storeId: new Types.ObjectId(storeId),
     });
 
     if (!userStore) {
