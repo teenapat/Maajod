@@ -66,6 +66,7 @@
 html {
   font-size: 18px;
   -webkit-text-size-adjust: 100%;
+  background: var(--color-bg);
 }
 
 body {
@@ -567,6 +568,10 @@ label {
 }
 
 @media (prefers-color-scheme: dark) {
+  html {
+    background: #0a1022;
+  }
+
   :root {
     --color-primary: #6fda8b;
     --color-primary-light: #8de8a3;

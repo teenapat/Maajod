@@ -17,12 +17,35 @@ export function TransactionModal() {
     };
     document.addEventListener('keydown', handleKey);
 
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    // Lock scroll โดยไม่เลื่อน body ออกจาก viewport
+    // (ถ้าใช้ position:fixed + top ลบ scrollY เนื้อหาจะหาย → backdrop-filter เบลอไม่ได้ → เห็นพื้นหลังขาว)
+    const html = document.documentElement;
+    const body = document.body;
+    const prev = {
+      htmlOverflow: html.style.overflow,
+      bodyOverflow: body.style.overflow,
+      bodyTouchAction: body.style.touchAction,
+    };
+
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    body.style.touchAction = 'none';
+
+    const preventTouchMove = (e: TouchEvent) => {
+      const target = e.target as Node;
+      const modalBody = document.querySelector('.tx-modal-body');
+      if (modalBody?.contains(target)) return;
+      e.preventDefault();
+    };
+
+    document.addEventListener('touchmove', preventTouchMove, { passive: false });
 
     return () => {
       document.removeEventListener('keydown', handleKey);
-      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('touchmove', preventTouchMove);
+      html.style.overflow = prev.htmlOverflow;
+      body.style.overflow = prev.bodyOverflow;
+      body.style.touchAction = prev.bodyTouchAction;
     };
   }, [isOpen, closeModal]);
 

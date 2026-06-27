@@ -5,13 +5,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(10, 16, 34, 0.55);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  /* โปร่งใสให้เห็น blur ชัด — เนื้อหาด้านหลังยังอยู่ใน viewport เพราะไม่ใช้ body position:fixed */
+  background: rgba(10, 16, 34, 0.4);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
   animation: tx-fade-in 0.2s ease;
   /* ขยับขึ้นกลางค่อนบน + เว้นขอบจอ */
   padding: var(--spacing-md);
   padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  /* กัน scroll ทะลุไปพื้นหลังบน mobile */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tx-modal-card {
@@ -144,6 +149,13 @@
 @keyframes tx-slide-up {
   from { transform: translateY(24px); opacity: 0.6; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+/* fallback เฉพาะ browser ที่ไม่รองรับ backdrop-filter */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .tx-modal-backdrop {
+    background: rgba(10, 16, 34, 0.88);
+  }
 }
 
 @media (min-width: 768px) {
