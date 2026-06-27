@@ -217,8 +217,10 @@ function CompareCard({ label, current, previous, variant }: CompareCardProps) {
 
   return (
     <div className={`compare-card ${variant}`}>
-      <span className="compare-card-label">{label}</span>
-      <span className="compare-card-value">{formatMoney(current)}</span>
+      <div className="compare-card-head">
+        <span className="compare-card-label">{label}</span>
+        <span className="compare-card-value">{formatMoney(current)}</span>
+      </div>
       <div className="compare-card-footer">
         <span className={`compare-trend ${trendClass}`}>
           {direction === 'up' && <ArrowUpRight size={14} />}

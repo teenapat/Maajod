@@ -37,7 +37,7 @@
 
 @media (min-width: 768px) {
   .dashboard-loading {
-    margin-left: var(--sidebar-width);
+    margin-left: 0;
   }
 }
 
@@ -90,34 +90,43 @@
 
 /* ===== Comparison Cards ===== */
 .compare-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
 }
 
 .compare-card {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
   padding: var(--spacing-md);
   border-radius: var(--radius-lg);
   background: var(--surface-1);
   border: 1px solid var(--border-soft);
   box-shadow: var(--shadow-sm);
-  border-top: 3px solid var(--color-border);
+  border-left: 4px solid var(--color-border);
 }
 
 .compare-card.income {
-  border-top-color: var(--color-income);
+  border-left-color: var(--color-income);
 }
 
 .compare-card.expense {
-  border-top-color: var(--color-expense);
+  border-left-color: var(--color-expense);
 }
 
 .compare-card.net {
-  border-top-color: var(--color-primary);
+  border-left-color: var(--color-primary);
+}
+
+.compare-card-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .compare-card-label {
@@ -137,8 +146,10 @@
 .compare-card-footer {
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   gap: 2px;
-  margin-top: 2px;
+  flex-shrink: 0;
+  text-align: right;
 }
 
 .compare-trend {
@@ -542,6 +553,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
+
   .stat-card,
   .net-card,
   .chart-container,
@@ -701,6 +713,18 @@
     gap: var(--spacing-lg);
   }
 
+  /* กัน grid blowout: ลูกทุกตัวยุบได้ ไม่ดันให้ล้นจอ */
+  .dashboard-content > * {
+    min-width: 0;
+  }
+
+  .stats-grid,
+  .net-card,
+  .chart-container,
+  .compare-section {
+    min-width: 0;
+  }
+
   /* Stats cards แนวนอน */
   .stats-grid {
     grid-column: 1 / -1;
@@ -767,6 +791,29 @@
     grid-column: span 1;
   }
 
+  /* Comparison section: เต็มความกว้าง + การ์ดซ้าย / กราฟขวา */
+  .dashboard-section.compare-section {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) 1fr;
+    grid-template-rows: auto 1fr;
+    gap: var(--spacing-md) var(--spacing-lg);
+    align-items: start;
+  }
+
+  .compare-section .section-title {
+    grid-column: 1 / -1;
+  }
+
+  .compare-section .compare-grid {
+    margin-bottom: 0;
+    align-self: stretch;
+  }
+
+  .compare-section .chart-container {
+    height: 100%;
+  }
+
   /* Pie chart - keep column on tablet */
   .pie-chart-container {
     flex-direction: column;
@@ -786,7 +833,7 @@
     gap: var(--spacing-lg);
   }
 
-  .pie-chart-container > .recharts-responsive-container {
+  .pie-chart-container>.recharts-responsive-container {
     flex: 0 0 250px;
     min-width: 250px;
   }
@@ -827,10 +874,10 @@
   }
 
   /* Comparison section: เต็มความกว้าง + การ์ดอยู่ข้างกราฟ */
-  .compare-section {
+  .dashboard-section.compare-section {
     grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: minmax(360px, 420px) 1fr;
     grid-template-rows: auto 1fr;
     gap: var(--spacing-md) var(--spacing-lg);
     align-items: start;
@@ -841,7 +888,6 @@
   }
 
   .compare-section .compare-grid {
-    grid-template-columns: 1fr;
     margin-bottom: 0;
     align-self: stretch;
   }
@@ -929,7 +975,7 @@
     grid-column: span 2;
   }
 
-  .pie-chart-container > .recharts-responsive-container {
+  .pie-chart-container>.recharts-responsive-container {
     max-width: 350px;
   }
 
@@ -943,14 +989,10 @@
     grid-column: span 1;
   }
 
-  /* Comparison section: เต็มความกว้าง + การ์ด 3 ใบเรียงแนวนอนข้างกราฟ */
+  /* Comparison section: เต็มความกว้าง + การ์ดแนวนอน stack ข้างกราฟ */
   .dashboard-section.compare-section {
     grid-column: 1 / -1;
     grid-template-columns: minmax(420px, 1fr) 2fr;
-  }
-
-  .compare-section .compare-grid {
-    grid-template-columns: repeat(3, 1fr);
   }
 }
 

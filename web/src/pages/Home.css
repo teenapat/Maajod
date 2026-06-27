@@ -15,7 +15,7 @@
 
   @media (min-width: 768px) {
     .home-loading {
-      margin-left: var(--sidebar-width);
+      margin-left: 0;
     }
   }
 

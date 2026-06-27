@@ -1,5 +1,5 @@
 import { Loader2 } from 'lucide-react';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { NavBar } from './components/NavBar';
 import { TransactionModal } from './components/TransactionModal';
@@ -14,6 +14,17 @@ import './styles/global.css';
 // Layout สำหรับหน้าที่ต้องล็อกอิน: เนื้อหา + เมนู + modal
 function ProtectedLayout({ children }: { children: ReactNode }) {
   const { user, isLoading } = useAuth();
+  const [collapsed, setCollapsed] = useState(
+    () => localStorage.getItem('sidebarCollapsed') === '1'
+  );
+
+  const toggleSidebar = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem('sidebarCollapsed', next ? '1' : '0');
+      return next;
+    });
+  };
 
   if (isLoading) {
     return (
@@ -30,8 +41,10 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
 
   return (
     <TransactionModalProvider>
-      <div className="container">{children}</div>
-      <NavBar />
+      <div className={`app-shell${collapsed ? ' sidebar-collapsed' : ''}`}>
+        <NavBar collapsed={collapsed} onToggle={toggleSidebar} />
+        <div className="container">{children}</div>
+      </div>
       <TransactionModal />
     </TransactionModalProvider>
   );

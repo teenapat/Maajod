@@ -1,10 +1,15 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, CalendarDays, LayoutDashboard, LogOut, Receipt, Plus, Minus } from 'lucide-react';
+import { Home, CalendarDays, LayoutDashboard, LogOut, Receipt, Plus, Minus, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTransactionModal } from '../contexts/TransactionModalContext';
 import './NavBar.css';
 
-export function NavBar() {
+interface NavBarProps {
+  collapsed?: boolean;
+  onToggle?: () => void;
+}
+
+export function NavBar({ onToggle }: NavBarProps) {
   const { user, logout } = useAuth();
   const { openModal } = useTransactionModal();
   const navigate = useNavigate();
@@ -17,13 +22,38 @@ export function NavBar() {
   };
 
   return (
-    <nav className="navbar">
+    <>
+      {/* ปุ่มเปิดเมนู: ลอยมุมซ้ายบน แสดงเฉพาะตอนพับ (desktop) */}
+      {onToggle && (
+        <button
+          type="button"
+          className="nav-open"
+          onClick={onToggle}
+          aria-label="เปิดเมนู"
+          title="เปิดเมนู"
+        >
+          <PanelLeftOpen size={22} />
+        </button>
+      )}
+
+      <nav className="navbar">
       {/* App title - แสดงเฉพาะ desktop */}
       <div className="nav-app-title">
         <div className="nav-app-logo">
           <Receipt size={24} />
         </div>
         <span className="nav-app-name">แม่จด</span>
+        {onToggle && (
+          <button
+            type="button"
+            className="nav-collapse"
+            onClick={onToggle}
+            aria-label="ย่อเมนู"
+            title="ย่อเมนู"
+          >
+            <PanelLeftClose size={20} />
+          </button>
+        )}
       </div>
 
       <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
@@ -66,10 +96,11 @@ export function NavBar() {
         <span className="nav-label">ภาพรวม</span>
       </NavLink>
 
-      <button className="nav-item logout" onClick={handleLogout} title={`ออกจากระบบ (${user?.name})`}>
-        <LogOut className="nav-icon" />
-        <span className="nav-label">ออก</span>
-      </button>
-    </nav>
+        <button className="nav-item logout" onClick={handleLogout} title={`ออกจากระบบ (${user?.name})`}>
+          <LogOut className="nav-icon" />
+          <span className="nav-label">ออก</span>
+        </button>
+      </nav>
+    </>
   );
 }

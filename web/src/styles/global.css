@@ -212,20 +212,35 @@ label {
   overflow-x: hidden;
 }
 
-/* Container - Desktop */
-@media (min-width: 768px) {
-  .container {
-    flex: 1;
-    max-width: 1200px;
-    padding: var(--spacing-md) var(--spacing-lg);
-    margin-left: var(--sidebar-width);
-  }
+/* App shell - ครอบ sidebar + เนื้อหา */
+.app-shell {
+  width: 100%;
+  min-width: 0;
 }
 
-/* Container - Large Desktop */
-@media (min-width: 1600px) {
+/* Container - Desktop */
+@media (min-width: 768px) {
+  .app-shell {
+    flex: 1;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
   .container {
-    max-width: 1500px;
+    /* หักความกว้าง sidebar ออก ไม่ให้ 100% + margin-left ล้นจอ */
+    width: calc(100% - var(--sidebar-width));
+    margin-left: var(--sidebar-width);
+    min-width: 0;
+    max-width: none;
+    padding: var(--spacing-md) var(--spacing-lg);
+    transition: margin-left 0.25s ease, width 0.25s ease;
+    box-sizing: border-box;
+  }
+
+  /* เมื่อพับ sidebar: เนื้อหากินเต็มความกว้าง */
+  .sidebar-collapsed .container {
+    width: 100%;
+    margin-left: 0;
   }
 }
 
